@@ -1,0 +1,157 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.clix.so/api-reference/overview
+derived_from: openapi/clix-so-openapi.yml
+docs:
+- https://docs.clix.so/api-reference/overview
+- https://docs.clix.so/api-reference/rate-limits
+- https://docs.clix.so/a2a/api-reference
+- https://docs.clix.so/a2a/advanced-features
+- https://docs.clix.so/integrations/webhook
+description: >-
+  How the Clix API behaves across operations. Two layers share one host: a small REST API at
+  https://api.clix.so/api/v1 (protobuf service exposed through grpc-gateway, so requests are JSON objects
+  wrapping lists — {devices: []}, {events: []}, {push_notifications: []} — and write actions use AIP-136
+  custom verbs like messages:send) and an A2A JSON-RPC layer at https://api.clix.so/a2a that wraps four of
+  those operations in tasks. The runtime semantics that matter to an agent — idempotency, cancellation,
+  tracing, streaming — live almost entirely in the A2A layer; the REST layer is deliberately thin.
+
+base_url: https://api.clix.so
+api_style: REST over HTTPS (TLS 1.2+), JSON request and response bodies, grpc-gateway custom methods; plus JSON-RPC 2.0 over POST /a2a with SSE streaming
+
+authentication:
+  rest:
+    scheme: two static API-key headers on every request
+    headers: {X-Clix-Project-ID: 'project identifier', X-Clix-API-Key: 'public or secret key'}
+    key_types:
+      public: 'Client-side SDKs in mobile apps, browsers, or public environments — safe to expose'
+      secret: 'Server-to-server: user management, message sending, campaign triggering — must keep confidential; prefix clix_sk_ (stated on the A2A pages)'
+  a2a:
+    scheme: 'X-API-Key: clix_sk_... (secret key only; public keys rejected; the project is resolved from the key so no project header is sent)'
+    version_header: 'A2A-Version: 1.0 (omit = V0 legacy)'
+  docs: https://docs.clix.so/api-reference/overview
+  detail: authentication/clix-so-authentication.yml
+
+idempotency:
+  supported: true
+  coverage: partial
+  scope:
+  - A2A SendMessage
+  mechanism: 'X-Clix-Idempotency-Key request header on A2A SendMessage; if absent, Clix falls back to message.messageId'
+  conflict_behavior: >-
+    Same key + same body: cached response replayed. Same key while the original is still running: HTTP 409
+    Conflict. Same key + different body: HTTP 409 Conflict. The 409 carries a JSON-RPC error with code -32603.
+  retention: not stated
+  rest_writes: >-
+    None of the seven REST write operations documents an idempotency key. Two are idempotent by behaviour
+    rather than by mechanism: ClixExternalService_CreateUser upserts ("will update the existing user's
+    properties" on a repeat), and ClixExternalService_DeleteUser returns 200 even if the user does not exist.
+    ClixExternalService_SendPushNotifications, StartLiveActivities and TriggerCampaign have no replay
+    protection — a retried send delivers twice. Webhook consumers are told to "implement idempotency using
+    message_id to handle duplicates", which places dedupe on the receiver.
+  docs: https://docs.clix.so/a2a/advanced-features
+  note: >-
+    1 of 8 write surfaces (the A2A task wrapper) carries a documented replay key. The provider's own DR page
+    says "Clients should retry with idempotency", which the REST surface does not make possible today.
+
+reversibility:
+  grade: documented
+  read_only: false
+  summary: >-
+    Push delivery is inherently unrecallable and the docs say nothing about recall, so most of the write
+    surface has no reversal path. The one documented reversal is A2A CancelTask, which cancels a task
+    "while non-terminal" — a stated, state-based window — and user deletion is explicitly irreversible.
+  surfaces:
+  - write: ClixExternalService_SendPushNotifications (POST /api/v1/messages:send)
+    reversal: none
+    note: No recall/withdraw operation is documented. Delivery results are returned per message; a sent push cannot be taken back.
+  - write: ClixExternalService_StartLiveActivities (POST /api/v1/live-activities:start)
+    reversal: none
+    note: No end/update-activity operation is in the spec.
+  - write: ClixExternalService_TriggerCampaign (POST /api/v1/campaigns/{campaign_id}:trigger)
+    reversal: none
+    note: '"Message delivery is asynchronous - the API returns immediately with a trigger_id, and messages are processed in the background." No cancel-trigger operation is documented; the trigger_id is for tracking only.'
+  - write: ClixExternalService_CreateUser / UpdateUser / CreateOrUpdateUsersPropertiesByDeviceId
+    reversal: 're-PATCH the properties (overwrite) — not a documented undo'
+    note: Properties are overwritten key by key; no history or restore is documented.
+  - write: ClixExternalService_DeleteUser (DELETE /api/v1/users/{project_user_id})
+    reversal: none
+    window: none
+    note: '"This action is irreversible and will remove the user and all associated data ... deleted users cannot be recovered". The docs advise updating properties instead of deleting when the need is temporary.'
+  - write: ClixExternalService_CreateEvents (POST /api/v1/events)
+    reversal: none
+    note: No delete-event operation exists.
+  - write: ClixExternalService_CreateOrUpdateDevices / SetProjectUserIdForDevice
+    reversal: 'SDK reset() (1.5.0/1.9.0) clears local state including device ID; server-side device deletion is not in the spec'
+  - write: A2A SendMessage (any skill)
+    reversal: CancelTask (V1) / tasks/cancel (V0)
+    window: 'while the task is non-terminal — "Cancels a non-terminal task"; a terminal task returns -32002 Task Not Cancelable'
+    docs: https://docs.clix.so/a2a/api-reference
+    grade: verified
+    note: Cancelling stops the task, not a push already handed to APNs/FCM.
+  dry_run:
+    supported: false
+    note: 'No dry-run/validate mode on the REST or A2A surface. The console offers a "Send Test" that "ignore[s] your audience and schedule settings" and sends to chosen devices — a human tool, not an API mode.'
+
+pagination:
+  rest: none — the REST API has no list operations
+  a2a:
+    style: cursor
+    request_params: {pageSize: 'integer, default 50', pageToken: 'cursor from a previous response', contextId: filter, status: 'filter by protocol state value'}
+    response_fields: {tasks: array, nextPageToken: string, pageSize: integer, totalSize: 'total on the first page only; later pages return 0'}
+    docs: https://docs.clix.so/a2a/api-reference
+
+field_expansion:
+  supported: false
+
+metadata:
+  supported: true
+  mechanism: 'free-form properties maps — user.properties (string | number | boolean | null values), event custom_properties, campaign trigger properties (become {{ trigger.* }} in templates and audience rules)'
+  limits: 'audience filters may reference at most 3 attributes; operators limited to equals, not equals, exists, not exists, in, not in'
+
+request_tracing:
+  request_id_header: X-Request-ID
+  description: 'Documented for A2A ("Capture X-Request-ID from every response"); observed as x-request-id on live REST and A2A 401 responses from api.clix.so.'
+
+versioning:
+  scheme: 'path (/api/v1) for REST; A2A-Version header (1.0 | 0.3) for A2A; SemVer for SDKs'
+  current: v1 / A2A 1.0
+  detail: lifecycle/clix-so-lifecycle.yml
+  changelog: changelog/clix-so-changelog.yml
+
+error_envelope:
+  media_type: 'text/plain on 400 and on edge 401s; application/json {"error": "..."} otherwise; JSON-RPC error objects on /a2a'
+  rfc9457: false
+  shape: '{ "error": "<message>" }'
+  detail: errors/clix-so-problem-types.yml
+  docs: https://docs.clix.so/api-reference/overview
+
+rate_limits:
+  signal_status: 429
+  headers: [X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After]
+  limit: 1,000 requests / second / project (token bucket, tracked by X-Clix-Project-ID)
+  detail: rate-limits/clix-so-rate-limits.yml
+  docs: https://docs.clix.so/api-reference/rate-limits
+
+webhooks:
+  signing_header: none documented
+  verification: 'none built in — customers add their own static custom headers (e.g. Authorization) in the console; A2A task webhooks carry Authorization: <scheme> <credentials> and X-A2A-Token'
+  events: [PUSH_SENT, PUSH_FAILED]
+  detail: asyncapi/clix-so-webhooks.yml
+  docs: https://docs.clix.so/integrations/webhook
+
+other_conventions:
+  - name: Batch bodies
+    detail: 'Write requests wrap lists: {push_notifications: [...]} ("We recommend sending up to 500 push notifications"), {events: [...]}, {devices: [...]}, {live_activities: [...]}.'
+  - name: Custom verbs
+    detail: 'AIP-136 style — POST /api/v1/messages:send, /api/v1/live-activities:start, /api/v1/campaigns/{campaign_id}:trigger.'
+  - name: Naming
+    detail: 'snake_case on REST (project_user_id, image_url); camelCase on A2A data parts (projectUserId, imageUrl).'
+  - name: Response shape
+    detail: 'User endpoints return only {properties: {...}}, "not the full user object". Delete returns {}.'
+  - name: Timeouts and retries
+    detail: 'Requests are terminated after 100 seconds. Retry 5xx with exponential backoff (1s, 2s, 4s); never retry 4xx unchanged.'
+  - name: Request size
+    detail: Maximum 10 MB per request.
+  - name: Content type
+    detail: JSON only (Content-Type application/json).

@@ -1,0 +1,124 @@
+generated: '2026-09-19'
+method: probed
+source: live GET of the named /.well-known/ path list on every host this record knows, 2026-09-19
+hit_count: 2
+note: >-
+  Two hosts serve a real /.well-known/agent-card.json: api.clix.so (the provider's operational A2A agent,
+  2,542 bytes application/json, v0.3.0 shape by default and v1.0 shape when the request carries
+  A2A-Version: 1.0) and docs.clix.so (a Mintlify-generated "Clix Documentation" card that also advertises an
+  agent-skills file at /.well-known/agent-skills/clix/skill.md, which is served). Every other named path
+  404s on every host. The registrable domain clix.so answers unknown /.well-known/* paths with a real 404
+  status (an HTML "Page not found" body, but the code is 404, not a 200 shell); www.clix.so is not served at
+  all (404 on / as well); console.clix.so 307s every path to /auth/login and so publishes nothing anonymously;
+  mcp.clix.so does not resolve. The negative-control path 404s on api, docs and apex, so the two 200s are
+  served documents and not a catch-all. No security.txt, no OpenID/OAuth metadata, no RFC 9727 api-catalog,
+  no ai-plugin.json. A WellKnown pointer IS emitted (two served documents); no SecurityTxt pointer is.
+hosts:
+- host: https://api.clix.so
+  role: API base URL, OpenAPI servers[] host, A2A JSON-RPC host
+  path_echo_control: passed
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json
+    bytes: 2542
+    file: a2a/clix-so-agent-card.json
+    note: Provider's A2A card. The same path with header A2A-Version 1.0 returns the v1 shape, saved as a2a/clix-so-agent-card-v1.json.
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/clix-so-negative-control-4e9b17c2.json
+    status: 404
+    control: true
+- host: https://docs.clix.so
+  role: documentation host (Mintlify), OpenAPI download host, docs MCP endpoint
+  path_echo_control: passed
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json
+    file: a2a/clix-so-docs-agent-card.json
+    note: Platform-generated documentation agent card (name "Clix Documentation", protocolVersion 0.3, HTTP+JSON, url https://docs.clix.so/). Not the operational agent.
+  - path: /.well-known/agent-skills/clix/skill.md
+    status: 200
+    content_type: text/markdown
+    file: skills/clix-so-docs-skill.md
+    note: Agent-skills document the docs card's skills[0].url points at; also exposed as MCP resource mintlify://skills/clix.
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/clix-so-negative-control-4e9b17c2.json
+    status: 404
+    control: true
+  other_discovery:
+  - {path: /llms.txt, status: 200, file: llms/clix-so-llms.txt}
+  - {path: /llms-full.txt, status: 200, bytes: 296948, note: 'not committed (*-llms-full.txt is gitignored)'}
+  - {path: /api-reference/openapi.json, status: 200, file: openapi/_original/clix-so-external-v1-openapi.json}
+  - {path: /mcp, status: 200, note: 'Mintlify docs MCP, Streamable HTTP; see mcp/clix-so-mcp.yml'}
+- host: https://clix.so
+  role: registrable domain (Next.js marketing site)
+  path_echo_control: passed
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/clix-so-negative-control-4e9b17c2.json
+    status: 404
+    control: true
+  other_discovery:
+  - {path: /robots.txt, status: 200, note: 'Allow /; Disallow /api/ and /_next/; Sitemap https://clix.so/sitemap.xml'}
+  - {path: /sitemap.xml, status: 200, note: 'six URLs: /, /use-cases, /pricing, /terms, /privacy, /availability'}
+  - {path: /llms.txt, status: 404}
+- host: https://www.clix.so
+  role: www alias — not served
+  documents:
+  - {path: /, status: 404, note: 'The www host returns 404 for the root and every /.well-known/* path; the site lives on the apex only.'}
+  - {path: /.well-known/agent-card.json, status: 404}
+  - {path: /.well-known/security.txt, status: 404}
+- host: https://console.clix.so
+  role: customer console (login-gated)
+  documents:
+  - {path: /.well-known/agent-card.json, status: 307, note: 'Every path, /.well-known/* included, 307s to /auth/login. Nothing is published anonymously on this host.'}
+  - {path: /.well-known/security.txt, status: 307}
+  - {path: /.well-known/openid-configuration, status: 307}
+  - {path: /.well-known/oauth-authorization-server, status: 307}
+  - {path: /.well-known/oauth-protected-resource, status: 307}
+- host: https://mcp.clix.so
+  role: conventional MCP host — does not exist
+  documents:
+  - {path: /.well-known/oauth-protected-resource, status: 0, note: 'DNS does not resolve (curl exit, no HTTP). Clix ships its MCP server as an npm stdio package, not on an mcp.* host.'}

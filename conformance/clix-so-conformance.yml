@@ -1,0 +1,108 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.clix.so/a2a/api-reference
+derived_from: openapi/clix-so-openapi.yml
+docs:
+- https://docs.clix.so/api-reference/overview
+- https://docs.clix.so/api-reference/rate-limits
+- https://docs.clix.so/security
+- https://docs.clix.so/security/compliance
+summary: >-
+  Clix's conformance profile is the agent-protocol stack plus a plain REST API: an A2A card served in both
+  0.3.0 and 1.0 shapes, JSON-RPC 2.0 with SSE streaming, MCP 2025-06-18 (the Mintlify docs endpoint; the stdio
+  package's protocol revision was not captured), an OpenAPI 3.1.0 generated from a protobuf service via
+  grpc-gateway (AIP-136 style custom verbs messages:send, live-activities:start, campaigns/{id}:trigger). It
+  declares no OAuth 2.0 / OIDC (two static API-key headers), no RFC 9457 problem details (400s are text/plain
+  strings; other errors {"error": "..."}), no RFC 9116 security.txt, no RFC 9727 api-catalog, no RFC 8594
+  Sunset. Rate limiting uses X-RateLimit-* headers plus Retry-After, not the IETF RateLimit header fields.
+  On compliance the provider is explicit: "We do not claim external certifications." The market Clix serves
+  (mobile push) has no interoperability standard of its own beyond the APNs and FCM transports it brokers, so
+  there is no domain-standard signature to record — reward-only, nothing invented.
+standards:
+- id: a2a
+  name: Agent2Agent protocol
+  version: 0.3.0 and 1.0 (header-negotiated)
+  conforms: true
+  evidence: a2a/clix-so-agent-card.json (protocolVersion 0.3.0, JSONRPC, 4 skills) and a2a/clix-so-agent-card-v1.json (supportedInterfaces protocolVersion 1.0) both fetched from https://api.clix.so/.well-known/agent-card.json; POST /a2a is a live key-gated responder (401 Missing API key). Graded conformant in a2a/clix-so-a2a.yml.
+- id: json-rpc-2.0
+  conforms: true
+  evidence: 'https://docs.clix.so/a2a/api-reference — every /a2a method is JSON-RPC 2.0; documented standard codes -32700..-32603 and A2A codes -32001..-32007. The docs MCP endpoint answered {"jsonrpc":"2.0",...} live.'
+- id: sse
+  name: Server-Sent Events (streaming transport)
+  conforms: true
+  evidence: SendStreamingMessage and SubscribeToTask stream JSON-RPC envelopes as SSE data lines (docs a2a/advanced-features); the docs MCP endpoint returned content-type text/event-stream live.
+- id: mcp
+  name: Model Context Protocol
+  version: '2025-06-18'
+  conforms: true
+  evidence: 'POST https://docs.clix.so/mcp initialize returned protocolVersion "2025-06-18" and tools/list returned 3 tools with inputSchema (mcp/clix-so-docs-mcp-tools.json). That endpoint is Mintlify-authored; the provider''s own @clix-so/clix-mcp-server is a stdio MCP server whose protocol revision was not observed.'
+- id: openapi-3.1
+  conforms: true
+  evidence: https://docs.clix.so/api-reference/openapi.json — openapi 3.1.0, 10 paths / 11 operations, 39 schemas, apiKey securitySchemes, servers[] https://api.clix.so. info.title is the proto file name and info.version is "version not set" (grpc-gateway output).
+- id: grpc-gateway / google-aip-136
+  name: protobuf-generated REST with custom methods
+  conforms: true
+  verification: partial
+  evidence: 'info.title "clix/external/v1/clix.proto", schema names rpcStatus/protobufAny/protobufNullValue, and colon custom verbs (/api/v1/messages:send, /api/v1/live-activities:start, /api/v1/campaigns/{campaign_id}:trigger). The .proto itself is not published (no grpc/ artifact).'
+- id: agent-skills
+  name: Agent Skills format (agentskills.io)
+  conforms: true
+  evidence: github.com/clix-so/skills — SKILL.md frontmatter (name, description, user-invocable) per skill, installed with `npx skills add clix-so/skills`; docs.clix.so serves /.well-known/agent-skills/clix/skill.md. Saved verbatim in skills/.
+- id: llms-txt
+  conforms: true
+  evidence: https://docs.clix.so/llms.txt (200, text/plain, links every page as .md and the OpenAPI) and /llms-full.txt (200, 296,948 bytes); every SDK repo also carries an llms.txt.
+- id: keep-a-changelog / semver
+  conforms: true
+  evidence: CHANGELOG.md in clix-android-sdk, clix-ios-sdk, clix-flutter-sdk, clix-react-native-sdk — "The format is based on Keep a Changelog 1.1.0, and this project adheres to Semantic Versioning 2.0.0." Applies to the SDKs; the REST API itself publishes no version number.
+- id: oauth2
+  conforms: false
+  evidence: 'securitySchemes are two apiKey headers (X-Clix-Project-ID, X-Clix-API-Key); A2A uses X-API-Key; /.well-known/oauth-authorization-server and /.well-known/oauth-protected-resource 404 on api, docs and apex hosts. The CLI''s `clix login` uses a device flow against the console, which is a human login, not an API scheme.'
+- id: oidc
+  conforms: false
+  evidence: /.well-known/openid-configuration 404 on every host.
+- id: rfc9457
+  name: Problem Details for HTTP APIs
+  conforms: false
+  evidence: 'OpenAPI 400 responses are text/plain strings ("Project User Id must be provided"); the overview documents {"error": "..."} JSON; live 401s are text/plain ("Missing API key", "Missing project id"). No application/problem+json anywhere.'
+- id: rfc9116
+  name: security.txt
+  conforms: false
+  evidence: /.well-known/security.txt 404 on clix.so, api.clix.so, docs.clix.so.
+- id: rfc9727
+  name: api-catalog
+  conforms: false
+  evidence: /.well-known/api-catalog 404 on every host.
+- id: rfc8594
+  name: Sunset header / deprecation signalling
+  conforms: false
+  evidence: No Sunset or Deprecation header documented; no operation carries deprecated:true; the A2A V0 mode is kept as "legacy compatibility" without a stated end date.
+- id: ietf-ratelimit-headers
+  name: RateLimit header fields (draft-ietf-httpapi-ratelimit-headers)
+  conforms: false
+  evidence: 'https://docs.clix.so/api-reference/rate-limits documents X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset (Unix seconds) and Retry-After on 429 — the de-facto X- family, not the IETF RateLimit / RateLimit-Policy fields.'
+- id: idempotency-key
+  name: Idempotency-Key request header (draft-ietf-httpapi-idempotency-key-header)
+  conforms: false
+  verification: partial
+  evidence: 'Replay protection exists only on the A2A SendMessage method, under a vendor header X-Clix-Idempotency-Key (fallback message.messageId), with documented 409 semantics. The REST writes document no idempotency key. Recorded as partial in conventions/clix-so-conventions.yml.'
+- id: cursor-pagination
+  conforms: true
+  verification: partial
+  evidence: A2A ListTasks uses pageSize/pageToken with nextPageToken (docs a2a/api-reference). The REST API has no list endpoints.
+- id: tls-1.2-minimum
+  conforms: true
+  evidence: 'API overview: "All API requests must use HTTPS (TLS 1.2+)". Live: clix.so and api.clix.so negotiate TLSv1.3 (security/clix-so-domain-security.yml).'
+compliance:
+  certifications: []
+  statement: We do not claim external certifications.
+  statement_url: https://docs.clix.so/security/compliance
+  monitored_frameworks: [AWS Foundational Security Best Practices, CIS AWS Foundations Benchmark v1.2.0 (Security Hub CSPM)]
+  process: Monthly review of findings with owners and due dates; evidence in an internal tracker; "When we adopt a formal standard, we will use AWS Audit Manager."
+  note: No Compliance pointer is emitted — the provider states it holds no external certification. The security/ops docs (RPO/RTO, resiliency testing, incident communication, S3 access review, data classification) are recorded in lifecycle/ and regulatory/.
+domain_standard_conformance:
+  applicable: false
+  note: >-
+    Mobile push has no market interoperability standard the contract could declare (APNs and FCM are the
+    platform transports Clix brokers, not standards a customer integrates against). Reward-only: nothing is
+    recorded and nothing is penalised. The closest thing to a domain signature is the A2A card itself, which
+    is recorded above as a protocol conformance, not a domain one.

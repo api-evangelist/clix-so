@@ -1,0 +1,89 @@
+generated: '2026-09-19'
+method: searched
+source: https://github.com/clix-so/clix-android-sdk/blob/main/CHANGELOG.md
+docs:
+- https://github.com/clix-so/clix-ios-sdk/blob/main/CHANGELOG.md
+- https://github.com/clix-so/clix-react-native-sdk/blob/main/CHANGELOG.md
+- https://github.com/clix-so/clix-flutter-sdk/blob/main/CHANGELOG.md
+- https://github.com/clix-so/clix-cli/releases
+- https://github.com/clix-so/clix-mcp-server/releases
+- https://docs.clix.so/a2a/version-compatibility
+- https://blog.clix.so/rss/
+description: >-
+  Clix publishes no dated changelog for the REST API itself (the OpenAPI carries "version not set" and the
+  docs have no release-notes page). What it does publish, and what this artifact captures, is a
+  Keep-a-Changelog CHANGELOG.md plus GitHub releases for each SDK, the CLI and the MCP server, and a V0->V1
+  version-compatibility page for the A2A surface. Recent window only; the repos are the source of truth.
+scheme: Semantic Versioning 2.0.0 per component; Keep a Changelog 1.1.0 format
+api_changelog_published: false
+current:
+  rest_api: v1 (undated)
+  a2a: '1.0 (A2A-Version header); V0 0.3 kept as legacy compatibility mode'
+  android: 1.5.1
+  ios: 1.9.0
+  react_native: 1.6.0
+  flutter: 0.1.0
+  cli: 1.1.3
+  mcp_server: 0.1.4
+entries:
+- component: clix-cli
+  version: v1.1.3
+  date: '2026-07-04'
+  source: https://github.com/clix-so/clix-cli/releases/tag/v1.1.3
+  note: Latest release across the estate; previous v1.1.2 2026-02-24. Highlights not captured (release body not read).
+- component: clix-android-sdk
+  version: 1.5.1
+  date: '2026-04-01'
+  breaking: []
+  fixes:
+  - Fixed notification tap not opening the app when autoHandleLandingURL is set to false
+  - When no onNotificationOpened handler is registered, the SDK now launches the app's main activity as a fallback
+- component: clix-react-native-sdk
+  version: 1.6.0
+  date: '2026-03-26'
+  source: https://github.com/clix-so/clix-react-native-sdk/releases/tag/1.6.0
+  note: Highlights not captured; previous 1.5.0 2026-02-19.
+- component: clix-android-sdk
+  version: 1.5.0
+  date: '2026-02-19'
+  additions: ['reset() method to clear all local SDK state including device ID']
+  deprecations: ['removeUserId() — use reset() instead']
+- component: clix-ios-sdk
+  version: 1.9.0
+  date: '2026-02-19'
+  additions: ['reset() method to clear all local SDK state including device ID']
+  deprecations: ['removeUserId() — use reset() instead']
+- component: clix-flutter-sdk
+  version: 0.1.0
+  date: '2026-02-19'
+  source: https://github.com/clix-so/clix-flutter-sdk/releases/tag/0.1.0
+  note: First minor; previous 0.0.5 2026-02-13.
+- component: clix-android-sdk / clix-ios-sdk
+  version: 1.4.1 / 1.8.1
+  date: '2026-02-13'
+  additions: ['sourceType field on SDK-internal events (SESSION_START, PUSH_NOTIFICATION_RECEIVED, PUSH_NOTIFICATION_TAPPED)']
+- component: clix-android-sdk / clix-ios-sdk
+  version: 1.4.0 / 1.8.0
+  date: '2026-02-12'
+  additions: ['Session tracking with automatic SESSION_START lifecycle events']
+- component: clix-mcp-server
+  version: 0.1.4
+  date: '2026-01-06'
+  source: https://github.com/clix-so/clix-mcp-server/releases/tag/0.1.4
+  note: Previous 0.1.3 2025-12-30, 0.1.2 2025-12-16.
+- component: a2a
+  version: 'V1 (A2A-Version: 1.0)'
+  date: null
+  breaking:
+  - PascalCase method names replace slash-style V0 names (SendMessage for message/send, etc.)
+  - kind discriminator removed from parts, messages, tasks and stream events
+  - SendMessage result moves to result.task
+  - ListTasks pagination changes from limit/offset to pageSize/pageToken with a paged response object
+  - Push-notification-config params renamed to taskId / id
+  note: Undated; documented at https://docs.clix.so/a2a/version-compatibility with a migration checklist. V0 remains available when the header is omitted.
+blog:
+  url: https://blog.clix.so/
+  rss: https://blog.clix.so/rss/
+  platform: Ghost
+  recent: [{title: A/B testing is dead for mobile — here's what replaces it, date: '2026-02-09'}, {title: 'The first 48 hours: designing activation flows that stick', date: '2026-02-04'}, {title: Real-time observability in notification systems, date: '2025-10-14'}]
+  note: Editorial, not release notes.

@@ -1,0 +1,55 @@
+# Clix Documentation
+
+## Docs
+
+- [Clix Documentation](https://docs.clix.so/index.md): Learn how to get started with Clix using quick guides, API references, and setup examples.
+- [Clix CLI](https://docs.clix.so/clix-cli.md): An AI-powered CLI to integrate, diagnose, and manage the Clix Mobile SDK through your favorite AI coding agent.
+- [Setup Firebase](https://docs.clix.so/firebase-setting.md): Firebase acts as the backend for sending push notifications. Setting up Firebase properly ensures your notifications reach your users reliably.
+- [SDK Quickstart - iOS](https://docs.clix.so/sdk-quickstart-ios.md): Start sending your first notification in 10 minutes.
+- [SDK Quickstart - Android](https://docs.clix.so/sdk-quickstart-android.md): Start sending your first notification in 10 minutes.
+- [SDK Quickstart - React Native](https://docs.clix.so/sdk-quickstart-react-native.md): Start sending your first notification in 10 minutes.
+- [SDK Quickstart - Flutter](https://docs.clix.so/sdk-quickstart-flutter.md): Start sending your first notification in 10 minutes.
+- [iOS Notification Service Extension](https://docs.clix.so/sdk-ios-nse.md): Guide for adding iOS Notification Service Extension to hybrid apps (React Native, Flutter) to support rich push notifications and push reception event tracking.
+- [iOS Live Activity](https://docs.clix.so/live-activity.md): Display real-time updates on the Lock Screen and Dynamic Island using Live Activities.
+- [User](https://docs.clix.so/essentials/user.md): In Clix, a user is the core entity representing an individual interacting with your mobile application. Clix uniquely identifies and manages users based on how they interact with your service.
+- [Deliverability](https://docs.clix.so/essentials/deliverability.md): Ensuring that push notifications reliably reach your users' devices is crucial for effective engagement.
+- [Notification Components](https://docs.clix.so/essentials/notification-components.md): Push notifications typically consist of several key components that dictate how your message will appear and sound on user devices. Below, we outline the components for both iOS and Android platforms with their specific restrictions and defaults.
+- [User Management](https://docs.clix.so/user-management/user-management.md): User management in the Clix SDK allows you to distinguish between anonymous users and identified users within your app. This ensures that push notifications, in-app messaging, and analytics can be personalized and consistent across devices and sessions.
+- [Event Tracking](https://docs.clix.so/event-tracking/event-tracking.md): Event tracking in the Clix SDK allows you to capture user actions and enrich them with meaningful properties, enabling events to drive campaign triggers, audience filters, and ongoing behavior insights.
+- [Personalization](https://docs.clix.so/personalization/personalization.md): Use dynamic variables and expressions to personalize message content, URLs, and audience targeting in Clix campaigns.
+- [Quickstart](https://docs.clix.so/campaigns/quickstart.md): Create and launch your first messaging campaign with Clix.
+- [Campaign Types](https://docs.clix.so/campaigns/types.md): Understand when to use scheduled, event-triggered, and API-triggered campaigns.
+- [API-Triggered Campaigns](https://docs.clix.so/campaigns/api-triggered.md): Configure campaigns in the console and trigger them from your backend with dynamic data.
+- [Message](https://docs.clix.so/campaigns/message.md): Compose the push notification content and send a test message.
+- [Audience](https://docs.clix.so/campaigns/audience.md): Select who will receive this campaign based on user or device conditions and review your full setup before launch.
+- [Metrics](https://docs.clix.so/campaigns/metrics.md): Track delivery and engagement for your campaigns.
+- [Clix MCP Server](https://docs.clix.so/mcp-server/clix-mcp-server.md): Enables AI agents to deliver real‑time, trustworthy Clix documentation and SDK code examples for seamless integrations right inside any MCP‑compatible client.
+- [Integrating Clix SDKs into Mobile Apps with MCP](https://docs.clix.so/mcp-server/integrating-clix-sdks-with-mcp.md): Onboarding guide for integrating Clix SDKs into mobile apps using Clix MCP Server for support.
+- [Agent Skills for Clix](https://docs.clix.so/agent-skills/index.md): A collection of Clix Agent Skills designed to accelerate development, from initial SDK integration with MCP support to event tracking, user management, personalization templates, and API-triggered campaigns.
+- [Overview](https://docs.clix.so/a2a/overview.md): Use the Agent-to-Agent (A2A) protocol to let external agents execute Clix skills through JSON-RPC.
+- [Quick Start](https://docs.clix.so/a2a/quickstart.md): Connect your agent to Clix A2A, inspect the Agent Card, send a task, stream updates, and register a webhook.
+- [API Reference](https://docs.clix.so/a2a/api-reference.md): Reference for Clix A2A endpoints, JSON-RPC methods, task types, and error semantics.
+- [Advanced Features](https://docs.clix.so/a2a/advanced-features.md): Streaming semantics, task webhooks, idempotency, and operational guidance for Clix A2A.
+- [Skills](https://docs.clix.so/a2a/skills.md): Payload shapes, artifacts, and usage notes for the four built-in Clix A2A skills.
+- [Version Compatibility](https://docs.clix.so/a2a/version-compatibility.md): Differences between Clix A2A V1 and legacy V0, with concrete migration guidance.
+- [Clix + Supabase Integration Guide](https://docs.clix.so/integrations/supabase-integration.md): How to send Clix push notifications from Supabase using Edge Functions, SQL triggers, and helper builders.
+- [Webhook](https://docs.clix.so/integrations/webhook.md): Receive real-time push notification events and message payloads in your external systems.
+- [Overview](https://docs.clix.so/api-reference/overview.md): Complete reference for Clix API endpoints
+- [Rate Limits](https://docs.clix.so/api-reference/rate-limits.md): Understanding rate limits for the Clix API
+- [Create User](https://docs.clix.so/api-reference/endpoint/users/create.md): Creates a new user with the specified project_user_id
+- [Update User](https://docs.clix.so/api-reference/endpoint/users/update.md): Updates user properties
+- [Delete User](https://docs.clix.so/api-reference/endpoint/users/delete.md): Permanently deletes a user and all associated data
+- [Trigger Campaign](https://docs.clix.so/api-reference/endpoint/campaigns:trigger.md): Triggers an API-triggered campaign to send messages to a specific audience
+- [Send Messages](https://docs.clix.so/api-reference/endpoint/messages:send.md): This endpoint sends push notifications to one or more user devices.
+- [Start Live Activities](https://docs.clix.so/api-reference/endpoint/live-activities:start.md): This endpoint starts iOS Live Activities on one or more user devices using Push to Start.
+- [Errors](https://docs.clix.so/troubleshooting/clix-server-errors.md): Troubleshooting errors you may face in Clix console.
+- [Notification Not Delivered to Device](https://docs.clix.so/troubleshooting/not-getting-push-notification.md): Refer to the checklist below to troubleshoot issues with push notifications not being delivered.
+- [Security and Ops](https://docs.clix.so/security/index.md): Overview of our security and operations docs.
+
+## OpenAPI Specs
+
+- [openapi](https://docs.clix.so/api-reference/openapi.json)
+
+## Optional
+
+- [Blog](https://blog.clix.so/)

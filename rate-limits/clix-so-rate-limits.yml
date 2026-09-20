@@ -1,0 +1,41 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.clix.so/api-reference/rate-limits
+docs:
+- https://docs.clix.so/api-reference/overview
+- https://clix.so/pricing
+limit_count: 1
+summary: >-
+  One published rate limit: a per-project token bucket of 1,000 requests per second across the Management
+  API (user management, message sending, campaign triggering), tracked by the X-Clix-Project-ID header, with
+  the runtime signal an agent needs — X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset on every
+  response and Retry-After on the 429. The A2A endpoint and the SDK ingestion endpoints (devices, events)
+  publish no separate limit. Plan quotas are on active devices, not requests. Higher limits are by email.
+rate_limits:
+- name: Management API token bucket
+  scope: per-project
+  key: X-Clix-Project-ID
+  limit: 1000
+  window: 1 second
+  burst: 1000
+  algorithm: token bucket — bucket starts full, each request consumes one token, refills to 1,000 every 1 second
+  applies_to: [ClixExternalService_CreateUser, ClixExternalService_UpdateUser, ClixExternalService_DeleteUser, ClixExternalService_SendPushNotifications, ClixExternalService_TriggerCampaign]
+  applies_to_note: 'The page names "user management endpoints, message sending endpoints, campaign triggering endpoints"; devices, events, live activities and the A2A endpoint are not named and are recorded as undocumented rather than unlimited.'
+  exhaustion_status: 429
+  exhaustion_body: '{"error": "Too Many Requests"}'
+  headers:
+    X-RateLimit-Limit: 'total tokens in the bucket — e.g. 1000'
+    X-RateLimit-Remaining: 'tokens available right now — e.g. 842'
+    X-RateLimit-Reset: 'Unix timestamp (seconds) when the bucket refills — e.g. 1699617005'
+    Retry-After: 'seconds to wait on a 429 — e.g. 1'
+  higher_limits: 'email support@clix.so with expected request patterns (steady vs bursty) and peak throughput'
+  source: https://docs.clix.so/api-reference/rate-limits
+other_limits:
+- {name: Request size, limit: 10 MB per request, source: 'https://docs.clix.so/api-reference/rate-limits'}
+- {name: Request timeout, limit: 100 seconds, source: 'https://docs.clix.so/api-reference/overview'}
+- {name: Push batch, limit: 'recommended up to 500 push notifications per messages:send call', source: 'openapi v1SendPushNotificationsRequest.push_notifications description'}
+- {name: Audience filter attributes, limit: 'maximum 3 attributes per audience definition', source: 'https://docs.clix.so/campaigns/api-triggered'}
+- {name: Active devices (plan quota), limit: '100,000 included on Free and Pro; $0.001 per additional device on Pro', source: 'https://clix.so/pricing'}
+- {name: Webhook timeout, limit: 'configurable per webhook, default 5000 ms', source: 'https://docs.clix.so/integrations/webhook'}
+observed:
+  note: No unauthenticated request reaches the rate limiter (401 is returned first), so the X-RateLimit-* headers were not observed live; the 401 responses carried x-request-id only.

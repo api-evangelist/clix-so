@@ -1,0 +1,67 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://clix.so/privacy
+signals:
+  data_subject_request:
+    url: https://clix.so/privacy
+    channel: contact@clix.so
+    stated_sla: null
+    evidence:
+    - source: https://clix.so/privacy
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'To exercise these rights, email us. We may verify your identity before processing requests.'
+    note: >-
+      A documented request channel (email) with identity verification, inside the privacy policy. No response
+      period is stated and there is no intake form or API (/privacy/requests 404).
+  data_residency:
+    url: https://clix.so/availability
+    regions: [us]
+    evidence:
+    - source: https://clix.so/availability
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'Multi-AZ services in us-west-1 region; Aurora Multi-AZ database with writer + reader; S3 object storage'
+    - source: https://clix.so/privacy
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'Our platform is hosted in the United States. We do not yet offer GDPR-compliant data transfer mechanisms like Standard Contractual Clauses.'
+    - source: https://docs.clix.so/security/rpo-rto
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'Primary region: us-west-1. DR region: us-west-2'
+    note: >-
+      A concrete, published hosting-region statement (us-west-1 primary, us-west-2 DR, United States only)
+      plus an explicit statement that EU transfer mechanisms are NOT offered. Recorded as the substance of a
+      residency disclosure; it is a single-region disclosure, not a residency choice.
+  incident_notification:
+    url: https://docs.clix.so/ops/incident-communication
+    stated_sla: 'Post to status page within 30 minutes'
+    evidence:
+    - source: https://docs.clix.so/ops/incident-communication
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'Trigger — SEV-1: API unavailable or message delivery halted for multiple tenants. During incident: Post to status page within 30 minutes; Update hourly until resolved. After incident: Post-mortem within 5 business days (summary, impact, timeline, corrective actions)'
+    - source: https://clix.so/privacy
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: "We'll notify you if we detect a breach involving your data, as required by law."
+    note: >-
+      A published incident-communication commitment with a stated first-notice window (30 minutes to the
+      status page) and a post-mortem window (5 business days). The DATA-BREACH notice in the privacy policy
+      carries no period of its own — "as required by law" — and is quoted verbatim rather than normalised.
+probed_absent:
+- {signal: subprocessors, url: 'https://clix.so/privacy', status: 200, note: 'Privacy policy: "A current list is available upon request. We''ll notify you of any material changes." — available on request is not published; /legal/subprocessors and /subprocessors 404.'}
+- {signal: accessibility_conformance, url: 'https://clix.so/accessibility', status: 404}
+- {signal: sbom, url: 'https://clix.so/security', status: 404, note: 'docs.clix.so/security exists (RPO/RTO, resiliency, data classification, compliance) but names no SBOM format.'}
+- {signal: support_lifetime, url: 'https://clix.so/terms', status: 200, note: 'No stated support period; "advance notice for material changes that affect paid functionality" only.'}
+- {signal: training_data_summary, url: 'https://clix.so/', status: 200, note: 'Not published.'}
+- {signal: ai_transparency, url: 'https://clix.so/', status: 200, note: 'The CLI and MCP server hand work to third-party AI coding agents (Gemini, Copilot, Claude Code, Codex, Cursor, OpenCode) and the docs say so, but no transparency/disclosure statement about Clix''s own use of AI on customer data was found.'}
+- {signal: global_privacy_control, url: 'https://clix.so/privacy', status: 200, note: 'No GPC statement. Not tested by header, per contract.'}
+- {signal: dpa, url: 'https://clix.so/legal/dpa', status: 404, note: 'No DPA published; /dpa also 404.'}
+- {signal: age_assurance, url: 'https://clix.so/privacy', status: 200, note: 'Not addressed.'}
+- {signal: notice_and_action, url: 'https://clix.so/transparency', status: 404}
+- {signal: transparency_report, url: 'https://clix.so/transparency', status: 404}
+- {signal: exit_assistance, url: 'https://docs.clix.so/legal/customer-responsibilities', status: 200, note: 'Advises customers to export "any message content, exports, or analytics you need to retain long-term" and configuration "before major changes", but documents no export tooling or switching assistance.'}
+- {signal: trust_center, url: 'https://clix.so/trust', status: 404, note: 'docs.clix.so/security/compliance: "We do not claim external certifications." Monitors AWS FSBP and CIS AWS Foundations v1.2.0 via Security Hub.'}

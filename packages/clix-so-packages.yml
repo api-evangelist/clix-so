@@ -1,0 +1,170 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  Registry metadata read 2026-09-19 — repo1.maven.org/maven2/so/clix/clix-android-sdk/maven-metadata.xml,
+  trunk.cocoapods.org/api/v1/pods/Clix, pub.dev/api/packages/clix_flutter, registry.npmjs.org for the three
+  @clix-so scoped packages, github.com/clix-so releases and Casks/clix.rb in clix-so/homebrew-clix-cli —
+  cross-checked against the install commands the docs publish (docs.clix.so/sdk-quickstart-*, /clix-cli,
+  /mcp-server/clix-mcp-server, /agent-skills).
+docs: https://docs.clix.so/
+github_org: https://github.com/clix-so
+package_count: 9
+official_count: 8
+summary: >-
+  Clix ships a first-party client SDK for each mobile platform it supports (Android on Maven Central, iOS on
+  CocoaPods and Swift Package Manager, Flutter on pub.dev, React Native on npm), a CLI (npm, Homebrew cask,
+  curl installer) and a stdio MCP server (npm). Every SDK repo carries a Keep-a-Changelog CHANGELOG.md and
+  an llms.txt. Releases are recent: the newest is the CLI (2026-07-04) and the oldest still-current SDK
+  release is Flutter 0.1.0 (2026-02-19). None predates the API surface it wraps. The docs badge for an
+  npm package @clix-so/clix-agent-skills points at a package the registry does not hold; the skills are
+  distributed from the GitHub repo instead (see skills/_index.yml).
+packages:
+- name: so.clix:clix-android-sdk
+  registry: maven
+  language: kotlin
+  kind: sdk
+  platform: android
+  official: true
+  version: 1.5.1
+  published: '2026-04-01'
+  url: https://repo1.maven.org/maven2/so/clix/clix-android-sdk/
+  repo: https://github.com/clix-so/clix-android-sdk
+  docs: https://docs.clix.so/sdk-quickstart-android
+  license: MIT License with Custom Restrictions (LICENSE in repo)
+  install: implementation("so.clix:clix-android-sdk:1.5.1")
+  note: >-
+    maven-metadata.xml lists 1.1.2 through 1.5.1 with lastUpdated 20260401050917; the 1.5.1 POM's
+    Last-Modified is 2026-04-01. search.maven.org's solr index returned 0 rows for g:so.clix on the same day,
+    so the artifact is verified from the repository itself, not the search API. GitHub release 1.5.1 is
+    dated 2026-04-01T05:00:05Z. CHANGELOG 1.5.0 (2026-02-19) added reset() and deprecated removeUserId().
+- name: Clix
+  registry: cocoapods
+  language: swift
+  kind: sdk
+  platform: ios
+  official: true
+  version: 1.9.0
+  published: '2026-02-19'
+  url: https://cocoapods.org/pods/Clix
+  repo: https://github.com/clix-so/clix-ios-sdk
+  docs: https://docs.clix.so/sdk-quickstart-ios
+  license: MIT (podspec) / MIT License with Custom Restrictions (LICENSE in repo)
+  install: pod 'Clix'
+  note: 22 versions on trunk from 0.0.1 (2025-05-29) to 1.9.0 (2026-02-19 10:23 UTC). Swift 5.5+. Repo also ships AGENTS.md, CLAUDE.md and llms.txt.
+- name: clix-ios-sdk (Swift Package)
+  registry: github
+  language: swift
+  kind: sdk
+  platform: ios
+  official: true
+  version: 1.9.0
+  published: '2026-02-19'
+  url: https://github.com/clix-so/clix-ios-sdk.git
+  repo: https://github.com/clix-so/clix-ios-sdk
+  docs: https://docs.clix.so/sdk-quickstart-ios
+  license: MIT License with Custom Restrictions
+  install: 'Xcode > Add Package Dependency > https://github.com/clix-so/clix-ios-sdk.git (Package.swift at repo root)'
+  note: Same repo and tag as the CocoaPod; the version is the GitHub release 1.9.0 (2026-02-19T10:04:12Z). No separate registry endpoint exists for SwiftPM.
+- name: clix_flutter
+  registry: pub
+  language: dart
+  kind: sdk
+  platform: flutter
+  official: true
+  version: 0.1.0
+  published: '2026-02-19'
+  url: https://pub.dev/packages/clix_flutter
+  repo: https://github.com/clix-so/clix-flutter-sdk
+  docs: https://docs.clix.so/sdk-quickstart-flutter
+  license: MIT License with Custom Restrictions
+  install: 'clix_flutter: ^0.1.0 (the quickstart still shows ^0.0.1)'
+  note: pub.dev latest 0.1.0 published 2026-02-19T10:06:33Z; pubspec homepage https://clix.so, repository clix-so/clix-flutter-sdk; requires Flutter >=3.33.0. Pre-1.0.
+- name: '@clix-so/react-native-sdk'
+  registry: npm
+  language: typescript
+  kind: sdk
+  platform: react-native
+  official: true
+  version: 1.6.0
+  published: '2026-03-26'
+  url: https://www.npmjs.com/package/@clix-so/react-native-sdk
+  repo: https://github.com/clix-so/clix-react-native-sdk
+  docs: https://docs.clix.so/sdk-quickstart-react-native
+  license: MIT
+  install: npm install @clix-so/react-native-sdk @notifee/react-native react-native-device-info react-native-get-random-values react-native-mmkv react-native-nitro-modules uuid@11.1.0
+  note: Published 2026-03-26T10:45:20Z by GitHub Actions. Peer dependencies are listed verbatim from the quickstart.
+- name: '@clix-so/clix-cli'
+  registry: npm
+  language: typescript
+  kind: cli
+  official: true
+  version: 1.1.3
+  published: '2026-07-04'
+  url: https://www.npmjs.com/package/@clix-so/clix-cli
+  repo: https://github.com/clix-so/clix-cli
+  docs: https://docs.clix.so/clix-cli
+  license: MIT (package.json) / MIT License with Custom Restrictions (LICENSE in repo)
+  install: npm install -g @clix-so/clix-cli
+  note: Binary `clix`; Node >=20. Also installable with `bun add -g @clix-so/clix-cli` and `curl -fsSL https://clix.sh/install | bash`. Command surface in cli/clix-so-cli.yml.
+- name: clix (Homebrew cask, tap clix-so/clix-cli)
+  registry: homebrew
+  language: binary
+  kind: cli
+  official: true
+  version: 1.1.3
+  published: '2026-07-04'
+  url: https://github.com/clix-so/homebrew-clix-cli/blob/main/Casks/clix.rb
+  repo: https://github.com/clix-so/clix-cli
+  docs: https://docs.clix.so/clix-cli
+  license: MIT License with Custom Restrictions
+  install: brew tap clix-so/clix-cli && brew install clix
+  note: >-
+    The cask pins version "1.1.3" and downloads clix-darwin-arm64 / clix-darwin-x64 from the clix-cli GitHub
+    release v1.1.3 (2026-07-04T05:15:54Z); the binary is unsigned and the cask strips the quarantine attribute.
+    Homebrew has no metadata endpoint for third-party taps, so the version is read from the cask file itself.
+- name: '@clix-so/clix-mcp-server'
+  registry: npm
+  language: typescript
+  kind: mcp-server
+  official: true
+  version: 0.1.4
+  published: '2026-01-06'
+  url: https://www.npmjs.com/package/@clix-so/clix-mcp-server
+  repo: https://github.com/clix-so/clix-mcp-server
+  docs: https://docs.clix.so/mcp-server/clix-mcp-server
+  license: SEE LICENSE IN LICENSE (MIT License with Custom Restrictions)
+  install: npx -y @clix-so/clix-mcp-server@latest
+  note: >-
+    Binary clix-mcp-server; Node >=18; stdio transport. Two tools, search_docs and search_sdk (src/tools/index.ts).
+    Published 2026-01-06T07:19:44Z by clix-bot. A third-party republish exists as @mseep/clix-mcp-server 0.1.4
+    (publisher skydeckai, 2026-06-22) pointing at the same repo — not first-party. Profile in mcp/clix-so-mcp.yml.
+- name: '@clix-so/clix-agent-skills'
+  registry: npm
+  language: markdown
+  kind: agent-skills
+  official: true
+  version: null
+  published: null
+  url: https://www.npmjs.com/package/@clix-so/clix-agent-skills
+  repo: https://github.com/clix-so/skills
+  docs: https://docs.clix.so/agent-skills
+  license: Apache-2.0 per skill (each skill directory carries its own LICENSE.txt)
+  install: npx skills add clix-so/skills
+  note: >-
+    The docs page carries an npm badge for this package name, but registry.npmjs.org returned no such package on
+    2026-09-19 — version and date are therefore null (checked, nothing to record). The skills are really
+    distributed from the GitHub repo through the agentskills.io `npx skills add` flow. Saved verbatim in skills/.
+not_first_party:
+- name: clix
+  registry: npm
+  note: 'royriojas/clix 5.0.0 (2019) — a shell helper, unrelated to Clix. Same for clix-cli 1.0.1 (publisher clix-cli, 2026-04-01, no repository) which is NOT the @clix-so/clix-cli package.'
+- name: clix
+  registry: pub
+  note: altwaireb/clix 1.2.0 — a Dart CLI toolkit, unrelated. The Clix Flutter SDK is clix_flutter.
+- name: '@mseep/clix-mcp-server'
+  registry: npm
+  note: Third-party republish of the Clix MCP server (skydeckai). Not first-party; listed so it is not mistaken for one.
+searched:
+- {registry: pypi, query: 'https://pypi.org/pypi/clix-so/json', status: 404, note: 'No Python SDK; the docs show raw HTTP for backend calls.'}
+- {registry: maven-search, query: 'https://search.maven.org/solrsearch/select?q=g:so.clix', result: '0 rows (index lag); repo1 metadata confirms the artifact'}
+- {registry: rubygems, note: 'not searched — no Ruby SDK is referenced anywhere on the docs or GitHub org'}

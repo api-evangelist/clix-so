@@ -1,0 +1,116 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/clix-so-openapi.yml
+inputs:
+- openapi/clix-so-openapi.yml (11 operations, all operationIds ClixExternalService_*)
+- a2a/clix-so-agent-card.json (4 skills) + https://docs.clix.so/a2a/skills (payload shapes and artifact names)
+- mcp/clix-so-mcp.yml (2 stdio tools read from source; 3 Mintlify docs tools from a live tools/list)
+summary: >-
+  Clix's agent surfaces are asymmetric. Its MCP tools (both the provider's stdio server and the Mintlify docs
+  endpoint) are documentation retrieval and bind to NO REST operation, so every MCP tool is mcp_only. Its
+  A2A skills are the execution surface, and each of the four binds cleanly to one REST operation — the docs
+  describe the same semantics, parameters and result fields (the A2A artifact `delivery-results` carries
+  the REST response's delivery_results shape, `trigger-result.triggerId` is the REST trigger_id, and
+  `user-result` returns the REST user identity). Seven REST operations — device registration, device-scoped
+  user identity and properties, health, live activities, user update and user delete — have no agent skill
+  and no tool. Confidence is medium rather than high on the skill rows because the A2A docs and the REST
+  spec were mapped by documented semantics; the live A2A endpoint is key-gated (POST /a2a without a key
+  returns 401 "Missing API key") and no task was executed.
+surfaces:
+  openapi:
+    file: openapi/clix-so-openapi.yml
+    origin: https://docs.clix.so/api-reference/openapi.json
+    base: https://api.clix.so
+    operations: 11
+    gated: true  # X-Clix-Project-ID + X-Clix-API-Key on every operation
+  a2a:
+    card: https://api.clix.so/.well-known/agent-card.json
+    endpoint: https://api.clix.so/a2a
+    skills: 4
+    gated: true  # X-API-Key (secret key, clix_sk_ prefix); public card is open
+  mcp_stdio:
+    package: '@clix-so/clix-mcp-server 0.1.4'
+    tools: 2
+    gated: false
+  mcp_remote:
+    endpoint: https://docs.clix.so/mcp
+    authorship: platform (Mintlify)
+    tools: 3
+    gated: false
+crosswalk:
+- tool: create-user
+  surface: a2a
+  category: users
+  rest: [ClixExternalService_CreateUser]
+  binding: 'A2A data part {skill: create-user, projectUserId, properties?} -> POST /api/v1/users {project_user_id, properties}. The REST operation upserts ("If a user with the same project_user_id already exists, this endpoint will update the existing user''s properties"), which is why the skill is named "Create or Update User".'
+  artifact: user-result {userId, projectUserId}
+  confidence: medium
+  note: ClixExternalService_UpdateUser (PATCH) is a narrower alternative binding for the update half; the skill docs describe one create-or-update call, so CreateUser is the primary.
+- tool: track-event
+  surface: a2a
+  category: events
+  rest: [ClixExternalService_CreateEvents]
+  binding: 'A2A {skill: track-event, eventName, deviceId, properties?} -> POST /api/v1/events {events: [{device_id, name, event_property: {custom_properties}}]}. The skill tracks one event for one device; the REST body is a list.'
+  artifact: event-result {trackedEvents, eventName}
+  confidence: medium
+- tool: send-push-notification
+  surface: a2a
+  category: messaging
+  rest: [ClixExternalService_SendPushNotifications]
+  binding: 'A2A {skill: send-push-notification, deviceId|userId|projectUserId, title?, body?, imageUrl?, landingUrl?} -> POST /api/v1/messages:send {push_notifications: [{target, title, body, image_url, landing_url}]}. Field names are the camelCase twins of the REST snake_case fields; one target per skill call, up to a recommended 500 per REST call.'
+  artifact: 'delivery-results {totalSent, results[]{messageId, status}} — status values are the REST DeliveryResultStatus enum strings (DELIVERY_RESULT_STATUS_SUCCEED / _FAILED)'
+  confidence: medium
+- tool: trigger-campaign
+  surface: a2a
+  category: campaigns
+  rest: [ClixExternalService_TriggerCampaign]
+  binding: 'A2A {skill: trigger-campaign, campaignId, targets?, properties?} -> POST /api/v1/campaigns/{campaign_id}:trigger {audience: {broadcast?, targets?}, properties?}. Omitting targets in A2A "creates the trigger without an explicit target list", the REST equivalent of triggering with the campaign''s default audience.'
+  artifact: trigger-result {triggerId}
+  confidence: medium
+mcp_only:
+- tool: search_docs
+  surface: mcp_stdio
+  reason: Documentation retrieval (semantic search over docs.clix.so llms.txt). No REST operation.
+- tool: search_sdk
+  surface: mcp_stdio
+  reason: Source-code retrieval from the four SDK GitHub repos. No REST operation.
+- tool: search_clix_documentation
+  surface: mcp_remote
+  reason: Mintlify platform docs search. No REST operation.
+- tool: query_docs_filesystem_clix_documentation
+  surface: mcp_remote
+  reason: Mintlify platform read-only virtual filesystem over the docs and the OpenAPI. No REST operation.
+- tool: submit_feedback
+  surface: mcp_remote
+  reason: Files docs feedback with Mintlify. Not a Clix API call.
+rest_only:
+- operationId: ClixExternalService_CreateOrUpdateDevices
+  route: POST /api/v1/devices
+  reason: Device registration (push token, platform, SDK metadata) is done by the mobile SDKs, not by agents.
+- operationId: ClixExternalService_SetProjectUserIdForDevice
+  route: POST /api/v1/devices/{deviceId}/user/project-user-id
+  reason: SDK identity binding; no skill.
+- operationId: ClixExternalService_CreateOrUpdateUsersPropertiesByDeviceId
+  route: POST /api/v1/devices/{deviceId}/user/properties
+  reason: SDK-side user properties by device; no skill.
+- operationId: ClixExternalService_HealthCheck
+  route: GET /api/v1/health
+  reason: Health probe; no skill. (Anonymous GET returned 404 on 2026-09-19 — see errors/clix-so-problem-types.yml.)
+- operationId: ClixExternalService_UpdateUser
+  route: PATCH /api/v1/users/{project_user_id}
+  reason: Partially covered by create-user's upsert semantics; no dedicated skill.
+- operationId: ClixExternalService_DeleteUser
+  route: DELETE /api/v1/users/{project_user_id}
+  reason: Irreversible delete has no agent skill — a sensible omission.
+- operationId: ClixExternalService_StartLiveActivities
+  route: POST /api/v1/live-activities:start
+  reason: iOS Live Activities push-to-start; no skill.
+coverage:
+  rest_operations: 11
+  rest_bound_by_a2a: 4
+  rest_bound_by_mcp: 0
+  rest_only: 7
+  a2a_skills: 4
+  a2a_bound: 4
+  mcp_tools: 5
+  mcp_only: 5

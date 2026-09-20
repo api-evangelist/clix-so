@@ -1,0 +1,75 @@
+generated: '2026-09-19'
+method: searched
+source: https://clix.so/availability
+derived_from: openapi/clix-so-openapi.yml
+docs:
+- https://clix.so/terms
+- https://clix.so/status
+- https://docs.clix.so/a2a/version-compatibility
+- https://docs.clix.so/security/rpo-rto
+- https://docs.clix.so/ops/incident-communication
+- https://docs.clix.so/legal/customer-responsibilities
+versioning:
+  scheme: URL path segment for REST (/api/v1/), request header for A2A (A2A-Version), SemVer for SDKs/CLI/MCP package
+  rest:
+    current: v1 (all 10 paths under /api/v1/)
+    spec_version: '"version not set" (info.version in the grpc-gateway-generated OpenAPI); no dated API version is published'
+    spec_url: https://docs.clix.so/api-reference/openapi.json
+    base_url: https://api.clix.so
+    policy_published: false
+  a2a:
+    current: "V1 — 'A2A-Version: 1.0' (recommended)"
+    legacy: V0 — 0.3, selected when the header is omitted ("Legacy compatibility mode")
+    policy: '"Keep V0 only if you already have a deployed client that depends on the older method names or older object wrappers. For any new integration, V1 is the stable documentation target." No end date for V0 is stated.'
+    docs: https://docs.clix.so/a2a/version-compatibility
+  sdks:
+    scheme: Semantic Versioning 2.0.0 with Keep a Changelog 1.1.0 CHANGELOG.md in every SDK repo
+    current: {android: 1.5.1 (2026-04-01), ios: 1.9.0 (2026-02-19), flutter: 0.1.0 (2026-02-19), react-native: 1.6.0 (2026-03-26), cli: 1.1.3 (2026-07-04), mcp-server: 0.1.4 (2026-01-06)}
+    detail: changelog/clix-so-changelog.yml
+deprecation:
+  policy_published: false
+  policy_text: '"We will give advance notice for material changes that affect paid functionality." (Terms of Service, updated August 22, 2025) — for other updates notice is given "where practical"; no minimum period is stated.'
+  policy_url: https://clix.so/terms
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  sdk_deprecations:
+  - {what: 'removeUserId()', replaced_by: 'reset()', since: 'Android 1.5.0 / iOS 1.9.0 (2026-02-19)', evidence: 'CHANGELOG.md "### Deprecated — removeUserId() — use reset() instead"'}
+  note: Zero OpenAPI operations carry deprecated:true. No Deprecation pointer is emitted — a one-line terms clause is not a deprecation policy.
+sla:
+  url: https://clix.so/availability
+  public_uptime_target: '99.5%'
+  target_text: '99.5% monthly for the Clix API and delivery pipeline'
+  scope: 'excluding scheduled maintenance and upstream push providers (APNs and FCM)'
+  binding: false
+  binding_text: '"This is a service target (SLO), not a warranty." (Terms) — no service credits.'
+  architecture: 'Multi-AZ services in us-west-1; Aurora Multi-AZ (writer + reader); S3; ALB with health checks and autoscaling'
+  rpo_rto:
+    url: https://docs.clix.so/security/rpo-rto
+    primary_region: us-west-1
+    dr_region: us-west-2
+    rpo: {within_region: '15 minutes (Aurora and S3 configuration data)', region_loss: '24 hours via daily cross-Region snapshot copy (Aurora) and S3 versioning'}
+    rto: {az_or_instance_failure: '30 minutes (Aurora failover + stateless services)', region_recovery: '4 hours (restore in us-west-2 + redeploy)'}
+    caveat: 'In-flight notification events during a region outage may be dropped. Clients should retry with idempotency.'
+    testing: 'Three resiliency tests at least annually and after major changes (https://docs.clix.so/security/resiliency-testing)'
+  request_timeout: 100 seconds
+status_page:
+  url: https://clix.so/status
+  kind: self-hosted (no Statuspage/Instatus/BetterStack link)
+  components: [API, Web Console, Logs Ingestion, Push Delivery (APNs), Push Delivery (FCM), Aurora Database / S3]
+  observed: {fetched: '2026-09-19', overall: Operational, scheduled_maintenance: none}
+  incident_history:
+  - {title: Degraded performance on Web Console, severity: Minor, status: Resolved, investigating: '2025-06-06T12:50Z', resolved: '2025-06-06T14:06Z', action: Upgraded instances and adjust auto-scaling policy}
+  probed: [{url: 'https://status.clix.so/', status: 0, note: 'does not resolve; the status page is a route on the apex'}]
+incident_communication:
+  url: https://docs.clix.so/ops/incident-communication
+  trigger: 'SEV-1: API unavailable or message delivery halted for multiple tenants'
+  during: ['Post to status page within 30 minutes', 'Update hourly until resolved']
+  after: 'Post-mortem within 5 business days (summary, impact, timeline, corrective actions)'
+  maintenance: 'Advance notice via the status page (availability page)'
+rate_limits: https://docs.clix.so/api-reference/rate-limits
+changelog: changelog/clix-so-changelog.yml
+retention:
+  by_plan: {free: '7 days event retention and logs/debugging archive', pro: '30 days', enterprise: unlimited}
+  data_classification: 'https://docs.clix.so/security/data-classification — device tokens retained while active and deleted on revoke; client IP in logs 30-90 days; message content 30-90 days by default'

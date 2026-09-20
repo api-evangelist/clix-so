@@ -1,0 +1,126 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://docs.clix.so/mcp-server/clix-mcp-server
+docs: https://docs.clix.so/mcp-server/clix-mcp-server
+summary: >-
+  Clix has two MCP surfaces and neither one executes Clix operations — both retrieve documentation. (1) The
+  provider-built "Clix MCP Server" is a stdio npm package, @clix-so/clix-mcp-server 0.1.4, run with
+  `npx -y @clix-so/clix-mcp-server@latest`; its two tools, search_docs and search_sdk, do semantic search over
+  the docs llms.txt index and over the four SDK source repos (read from src/tools/index.ts and
+  src/tools/descriptions.ts in the repo — the server was not run). (2) A remote Streamable HTTP endpoint at
+  https://docs.clix.so/mcp is served by Mintlify for the docs site: initialize and tools/list answer
+  anonymously (protocol 2025-06-18, serverInfo "Clix Documentation" 1.0.0) with three platform tools —
+  search_clix_documentation, query_docs_filesystem_clix_documentation and submit_feedback — and one resource,
+  mintlify://skills/clix. The operational agent surface (create users, track events, send pushes, trigger
+  campaigns) is NOT MCP; it is the A2A agent at https://api.clix.so/a2a (a2a/clix-so-a2a.yml), and the docs
+  say so explicitly ("Use Clix MCP Server when your assistant needs context. Use A2A when your agent needs to
+  execute work inside Clix.").
+deployment:
+  mode: both
+  endpoint: https://docs.clix.so/mcp
+  install: npx -y @clix-so/clix-mcp-server@latest
+  package: https://www.npmjs.com/package/@clix-so/clix-mcp-server
+  auth: none
+  verified: probed
+  note: >-
+    `both` because a hosted endpoint AND an npx package exist, but they are different servers by different
+    authors: the remote endpoint is Mintlify's platform docs-MCP running under the provider's docs host
+    (authorship: platform), and the stdio package is the provider's own code (authorship: provider). The
+    remote endpoint was probed live (initialize + tools/list 200, anonymous). The stdio package was verified
+    from the npm registry and the repository source, not by running it. Neither needs a credential — auth:
+    none is true of both. No OAuth metadata is served on docs.clix.so (both /.well-known/oauth-* paths 404).
+servers:
+- id: clix-mcp-server
+  name: Clix MCP Server
+  authorship: provider
+  transport: stdio
+  package: '@clix-so/clix-mcp-server'
+  version: 0.1.4
+  published: '2026-01-06'
+  repo: https://github.com/clix-so/clix-mcp-server
+  license: MIT License with Custom Restrictions
+  runtime: Node.js >= 18
+  install:
+    npm: npm i -g @clix-so/clix-mcp-server@latest
+    yarn: yarn global add @clix-so/clix-mcp-server@latest
+    cli: clix mcp   # the Clix CLI installs and configures it (docs.clix.so/clix-cli)
+  client_config:
+    mcpServers:
+      clix-mcp-server:
+        command: npx
+        args: ['-y', '@clix-so/clix-mcp-server@latest']
+  documented_clients: [Android Studio (Copilot plugin / JetBrains MCP plugin / Gemini agent), Xcode (Copilot for Xcode), Cursor, Visual Studio Code, Claude Code CLI, Codex CLI, Gemini CLI]
+  auth: none
+  status: published
+  tools:
+  - name: search_docs
+    read_only: true
+    description: Semantic search over the official Clix documentation index (llms.txt); returns fetched documentation content, excerpts, source URLs, ranked by relevance.
+    input_schema:
+      query: string, required, 2-200 characters
+      maxResults: integer, optional, 1-10, default 3
+    source: src/tools/descriptions.ts (DOCS_SEARCH_DESCRIPTION)
+  - name: search_sdk
+    read_only: true
+    description: Search Clix SDK source code across iOS (Swift), Android (Kotlin), Flutter (Dart) and React Native (TypeScript); returns actual source fetched from GitHub with file metadata and repository links.
+    input_schema: 'see src/tools/search-sdk.ts — parameters not captured in this pass (the description was read; the schema was not)'
+    source: src/tools/descriptions.ts (SDK_SEARCH_DESCRIPTION)
+  note: >-
+    Tool names come from src/tools/index.ts (MCP_TOOLS = { search_docs, search_sdk }). The provider's own agent
+    skills reference these tools as `clix-mcp-server:search_docs`, which confirms the names in use. No
+    tools/list was run against the stdio server.
+- id: mintlify-docs-mcp
+  name: Clix Documentation (Mintlify docs MCP)
+  authorship: platform
+  platform: Mintlify (x-matched-path /_mintlify/mcp/[subdomain]/[transport]; frame-ancestors dashboard.mintlify.com)
+  endpoint: https://docs.clix.so/mcp
+  transport: streamable-http
+  http_methods: [POST]
+  auth: none
+  status: live
+  probe:
+    fetched: '2026-09-19'
+    get_request: {http_status: 405, body: '{"jsonrpc":"2.0","error":{"code":-32000,"message":"Method not allowed."},"id":null}'}
+    initialize:
+      http_status: 200
+      content_type: text/event-stream
+      protocol_version: '2025-06-18'
+      server_info: {name: Clix Documentation, version: 1.0.0}
+      capabilities: {tools: {listChanged: true}, resources: {listChanged: true}}
+      instructions_excerpt: >-
+        "This Model Context Protocol server provides search and retrieval tools for the Clix Documentation
+        site. Use it to answer questions from public site content ... Apart from the submit_feedback tool,
+        the server is read-only and scoped to Clix Documentation; it does not otherwise perform actions,
+        mutate state, or access anything beyond the published site content and these resources."
+    tools_list:
+      http_status: 200
+      tool_count: 3
+      file: mcp/clix-so-docs-mcp-tools.json
+    resources_list:
+      http_status: 200
+      resources:
+      - {uri: 'mintlify://skills/clix', name: clix, mimeType: text/markdown, note: 'the same skill served at /.well-known/agent-skills/clix/skill.md'}
+  tools:
+  - name: search_clix_documentation
+    title: Search documentation
+    read_only: true
+    input_schema: {query: string, required}
+    annotations: {readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false}
+  - name: query_docs_filesystem_clix_documentation
+    read_only: true
+    input_schema: {command: 'string — a read-only shell-like command (rg, grep, find, tree, ls, cat, head, tail, jq ...) against a virtual filesystem of the docs pages and the OpenAPI, which is mounted at /openapi/api-reference/openapi.json'}
+  - name: submit_feedback
+    title: Submit documentation feedback
+    read_only: false
+    input_schema: {path: 'string, required', feedback: 'string, required'}
+    note: The only writing tool; it files docs feedback with Mintlify, it does not touch Clix data.
+  note: >-
+    A platform surface, counted here because it is live on the provider's docs host and anonymous, but it is
+    documentation retrieval only. It does not appear in Clix's own docs; Clix documents the npm stdio server.
+operational_surface:
+  protocol: A2A
+  endpoint: https://api.clix.so/a2a
+  card: a2a/clix-so-agent-card.json
+  skills: [create-user, track-event, send-push-notification, trigger-campaign]
+  note: See a2a/clix-so-a2a.yml and mcp/clix-so-tool-crosswalk.yml — the crosswalk binds the four A2A skills to the REST operationIds, since the MCP tools bind to none.

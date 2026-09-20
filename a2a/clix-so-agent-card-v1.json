@@ -1,0 +1,83 @@
+{
+  "name" : "Clix Agent",
+  "description" : "AI Agent for Clix - Send push notifications, manage campaigns, and track user events",
+  "supportedInterfaces" : [ {
+    "url" : "https://api.clix.so/a2a",
+    "protocolBinding" : "JSONRPC",
+    "tenant" : "",
+    "protocolVersion" : "1.0"
+  } ],
+  "provider" : {
+    "url" : "https://api.clix.so",
+    "organization" : "Clix"
+  },
+  "version" : "1.0.0",
+  "documentationUrl" : null,
+  "capabilities" : {
+    "streaming" : true,
+    "pushNotifications" : true,
+    "extensions" : [ ],
+    "extendedAgentCard" : true
+  },
+  "securitySchemes" : {
+    "apiKey" : {
+      "apiKeySecurityScheme" : {
+        "description" : "Secret API key for A2A authentication",
+        "location" : "header",
+        "name" : "X-API-Key"
+      },
+      "httpAuthSecurityScheme" : null,
+      "oauth2SecurityScheme" : null,
+      "openIdConnectSecurityScheme" : null,
+      "mtlsSecurityScheme" : null
+    }
+  },
+  "securityRequirements" : [ {
+    "schemes" : {
+      "apiKey" : {
+        "list" : [ ]
+      }
+    }
+  } ],
+  "defaultInputModes" : [ "text/plain", "application/json" ],
+  "defaultOutputModes" : [ "text/plain", "application/json" ],
+  "skills" : [ {
+    "id" : "send-push-notification",
+    "name" : "Send Push Notification",
+    "description" : "Send push notifications to specific devices, users, or project users",
+    "tags" : [ "push", "notification", "messaging" ],
+    "examples" : [ "Send a push notification to device abc123 with title 'Hello' and body 'World'", "Notify user john@example.com about their order" ],
+    "inputModes" : [ ],
+    "outputModes" : [ ],
+    "securityRequirements" : [ ]
+  }, {
+    "id" : "trigger-campaign",
+    "name" : "Trigger Campaign",
+    "description" : "Trigger an existing campaign to broadcast or target specific users",
+    "tags" : [ "campaign", "marketing", "automation" ],
+    "examples" : [ "Trigger campaign 'summer-sale' for all users", "Activate campaign id 550e8400 for user userId123" ],
+    "inputModes" : [ ],
+    "outputModes" : [ ],
+    "securityRequirements" : [ ]
+  }, {
+    "id" : "create-user",
+    "name" : "Create or Update User",
+    "description" : "Create a new user or update user properties in a project",
+    "tags" : [ "user", "crm", "profile" ],
+    "examples" : [ "Create user with project_user_id 'user123' and properties name='John'" ],
+    "inputModes" : [ ],
+    "outputModes" : [ ],
+    "securityRequirements" : [ ]
+  }, {
+    "id" : "track-event",
+    "name" : "Track User Event",
+    "description" : "Track custom events for users and devices",
+    "tags" : [ "event", "analytics", "tracking" ],
+    "examples" : [ "Track 'purchase' event for user user123 with amount=99.99" ],
+    "inputModes" : [ ],
+    "outputModes" : [ ],
+    "securityRequirements" : [ ]
+  } ],
+  "signatures" : [ ],
+  "iconUrl" : null
+}

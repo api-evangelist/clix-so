@@ -1,0 +1,71 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.clix.so/integrations/webhook
+docs:
+- https://docs.clix.so/integrations/webhook
+- https://docs.clix.so/a2a/advanced-features
+asyncapi_published: false
+summary: >-
+  Clix documents two outbound webhook surfaces and ships no AsyncAPI for either, so this is a webhook catalog
+  (not a generated AsyncAPI). (1) Project webhooks, configured in the console, POST a JSON event to a customer
+  HTTPS URL when a push notification is sent or fails — two event types, PUSH_SENT and PUSH_FAILED, one
+  payload shape. There is no signature header; authentication is whatever static custom headers the customer
+  configures. (2) A2A task webhooks, registered per task through CreateTaskPushNotificationConfig, POST a
+  JSON-RPC request (method tasks/pushNotification) carrying a statusUpdate; Clix sends Authorization and
+  X-A2A-Token when configured and refuses local-only destinations. Retry policy is not documented for either.
+webhooks:
+  configuration:
+    where: Console > Project settings > Webhook tab > "Create a webhook"
+    fields:
+      name: descriptive label
+      triggers: 'Sent, Failed (one or both)'
+      http_method: POST (only)
+      url: 'must be a valid HTTPS URL, publicly reachable (firewall allow-listing of Clix IPs is required; the IP list is not published on the page)'
+      timeout_ms: 'default 5000'
+      custom_headers: 'optional — Content-Type application/json is added automatically; customers add Authorization or other headers themselves'
+    activation: immediate on save
+  security:
+    signature_header: none
+    verification: 'none built in — rely on your own custom header (e.g. Authorization) configured on the webhook'
+    replay_protection: 'none — the docs recommend "implement idempotency using message_id to handle duplicates"'
+  delivery:
+    expected_response: '2xx within the configured timeout, "ideally under 1 second"; process asynchronously'
+    retries: not documented
+    logs: 'per-webhook Sent/Failed counts and detailed delivery logs in the console (connection timeouts, invalid SSL certificates, non-2xx responses, connection refusals)'
+    load_warning: '"High volumes of push notifications can generate significant traffic to your webhook endpoint" — TPS/stress test before enabling in production'
+  events:
+  - name: PUSH_SENT
+    trigger: Sent — a push notification was successfully sent to a device
+    payload:
+      project_id: string
+      event_type: PUSH_SENT
+      timestamp: RFC 3339 with nanoseconds (e.g. 2025-12-16T07:42:54.168140781Z)
+      message_id: string (uuid-like)
+      device_id: string (uuid-like)
+      platform: 'string enum — ANDROID observed in the example; iOS implied by the product'
+      notification: {title: string, body: string, image_url: string, landing_url: string}
+  - name: PUSH_FAILED
+    trigger: Failed — a push notification failed to be delivered
+    payload: same shape as PUSH_SENT with event_type PUSH_FAILED
+  example:
+    project_id: YOUR_PROJECT_ID
+    event_type: PUSH_SENT
+    timestamp: '2025-12-16T07:42:54.168140781Z'
+    message_id: abcdefgh-b3f9-7950-9b24-abcdefgh
+    device_id: abcdefgh-9171-4292-8382-abcdefgh
+    platform: ANDROID
+    notification: {title: '👋 Hello from Clix!', body: 'This is a test message to check your push setup 🚀', image_url: '', landing_url: ''}
+a2a_task_webhooks:
+  register: 'JSON-RPC CreateTaskPushNotificationConfig {taskId, url, token?, authentication?: {scheme, credentials}} (V0: tasks/pushNotificationConfig/set)'
+  manage: [GetTaskPushNotificationConfig, ListTaskPushNotificationConfigs, DeleteTaskPushNotificationConfig]
+  callback:
+    method: POST
+    body: 'JSON-RPC request {jsonrpc: "2.0", method: "tasks/pushNotification", params: {result: {statusUpdate: {taskId, contextId, status: {state, timestamp}}}}}'
+    headers: ['Authorization: <scheme> <credentials> (when authentication configured)', 'X-A2A-Token: <token> (when token configured)']
+  url_safety: 'Loopback, link-local, site-local and other local-only addresses are rejected; use a publicly reachable HTTPS endpoint.'
+  scope: 'Task lifecycle events only — "They are not device push notifications."'
+  states_emitted: [submitted, working, completed, failed, canceled, rejected, input-required, auth-required]
+streaming:
+  protocol: Server-Sent Events over POST https://api.clix.so/a2a
+  methods: [SendStreamingMessage, SubscribeToTask]
+  note: 'Built-in skills emit statusUpdate events only (no artifactUpdate). SubscribeToTask returns a single snapshot and closes; it is not a resumable stream.'

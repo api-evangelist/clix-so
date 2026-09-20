@@ -1,0 +1,62 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.clix.so/api-reference/overview
+derived_from: openapi/clix-so-openapi.yml
+docs:
+- https://docs.clix.so/api-reference/overview
+- https://docs.clix.so/a2a/overview
+- https://docs.clix.so/clix-cli
+summary:
+  types: [apiKey]
+  api_key_in: [header]
+  oauth2: false
+  oidc: false
+  mtls: false
+  note: >-
+    Static API keys throughout. REST needs two headers on every call (project id + key); A2A needs one
+    (secret key, from which the project is resolved). Two key TYPES exist — public for client SDKs, secret
+    (clix_sk_ prefix) for server-side writes — and the docs are explicit that public keys are rejected on
+    /a2a and should not be used for user management, sending or triggering. Keys are issued in the console
+    (console.clix.so, login-gated); no OAuth metadata is served on any host.
+schemes:
+- name: ProjectIdAuth
+  type: apiKey
+  in: header
+  parameter: X-Clix-Project-ID
+  description: Project ID for authentication — identifies the project; rate limits are tracked on it.
+  required_with: ApiKeyAuth
+  surfaces: [REST]
+  sources: [openapi/clix-so-openapi.yml, 'https://docs.clix.so/api-reference/overview']
+- name: ApiKeyAuth
+  type: apiKey
+  in: header
+  parameter: X-Clix-API-Key
+  description: API Key for authentication — public or secret depending on the operation.
+  key_types:
+  - {kind: public, prefix: not stated, use: 'Client-side SDKs in mobile apps, browsers, or public environments', visibility: Safe to expose}
+  - {kind: secret, prefix: clix_sk_, use: 'Server-to-server communication, secure backend operations — user management, message sending, campaign triggering', visibility: Must keep confidential}
+  surfaces: [REST]
+  sources: [openapi/clix-so-openapi.yml, 'https://docs.clix.so/api-reference/overview']
+- name: apiKey (A2A)
+  type: apiKey
+  in: header
+  parameter: X-API-Key
+  description: Secret API key for A2A authentication (agent card securitySchemes.apiKey). Secret keys only; public keys are rejected; the project is resolved from the key so no project header is sent.
+  surfaces: [A2A — POST https://api.clix.so/a2a]
+  sources: [a2a/clix-so-agent-card.json, 'https://docs.clix.so/a2a/overview']
+  observed: 'POST /a2a without the header -> 401 text/plain "Missing API key" (2026-09-19)'
+- name: none (MCP)
+  type: none
+  description: Neither MCP server takes a credential — the stdio @clix-so/clix-mcp-server and the Mintlify docs endpoint at https://docs.clix.so/mcp both search public documentation only.
+  surfaces: [MCP]
+- name: device flow (CLI)
+  type: human-login
+  description: '`clix login` authenticates the CLI with a Clix account via device flow; `clix logout` removes stored credentials; `clix whoami` shows the user. A developer-session login, not an API scheme.'
+  surfaces: [CLI]
+  sources: ['https://docs.clix.so/clix-cli']
+key_management:
+  issued_in: Clix console (https://console.clix.so — every path 307s to /auth/login)
+  rotation: 'Docs advise: store keys in environment variables or a secrets manager, rotate, least privilege (public in clients, secret only in trusted backends), audit and revoke unused keys, alert on unusual activity. No rotation API is documented.'
+  scopes: none — no scoped or restricted keys beyond the public/secret split
+errors:
+  '401': 'Verify API key and Project ID are correct and valid. Observed bodies: "Missing project id" (REST), "Missing API key" (A2A).'

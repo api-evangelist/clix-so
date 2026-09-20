@@ -1,0 +1,57 @@
+generated: '2026-09-19'
+method: searched
+source: https://clix.so/pricing
+docs:
+- https://clix.so/terms
+plan_count: 3
+currency: USD
+model: 'free tier, then a flat monthly subscription with per-device overage; enterprise by contact'
+metering_unit: 'active devices — "Count of devices that have generated one or more events or have received at least one message."'
+summary: >-
+  Three tiers as published on the pricing page on 2026-09-19. Notifications and team seats are unlimited on
+  every tier; the meter is active devices and the differentiator is retention. No API-call quota is priced;
+  the API rate limit (1,000 requests/second/project) is documented separately and the terms say plan limits
+  may be enforced by restriction or overage fees.
+plans:
+- id: free
+  name: Free
+  price: 0
+  currency: USD
+  period: month
+  included:
+    active_devices: 100000
+    notifications: unlimited
+    team_seats: unlimited
+    event_retention: 7 days
+    logs_and_debugging_archive: 7 days
+  support: Community
+  overage: none stated
+- id: pro
+  name: Pro
+  price: 30
+  currency: USD
+  period: month
+  included:
+    active_devices: 100000
+    notifications: unlimited
+    team_seats: unlimited
+    event_retention: 30 days
+    logs_and_debugging_archive: 30 days
+  overage: '$0.001 per additional 1 active device from 100K'
+  features: [Advanced metrics]
+- id: enterprise
+  name: Enterprise
+  price: null
+  currency: USD
+  period: custom
+  contact: sales@clix.so
+  included:
+    active_devices: not specified
+    notifications: unlimited
+    team_seats: unlimited
+    event_retention: unlimited
+    logs_and_debugging_archive: unlimited
+  support: Dedicated support
+terms:
+  overage_clause: '"If you exceed the limits of your plan, we may restrict access or charge overage fees." (Terms of Service)'
+  sla: '99.5% monthly SLO for the API and delivery pipeline; a target, not a warranty; no credits (lifecycle/clix-so-lifecycle.yml)'

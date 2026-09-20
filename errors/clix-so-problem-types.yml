@@ -1,0 +1,109 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/clix-so-openapi.yml
+probed: true
+docs:
+- https://docs.clix.so/api-reference/overview
+- https://docs.clix.so/a2a/api-reference
+- https://docs.clix.so/troubleshooting/clix-server-errors
+format: 'mixed — text/plain string on 400, JSON {"error": "<string>"} elsewhere, JSON-RPC 2.0 error objects on /a2a'
+rfc9457: false
+envelope:
+  rest_400:
+    media_type: text/plain
+    shape: a bare human-readable sentence
+    evidence: 'OpenAPI declares every 400 as text/plain with a string schema and an example; the endpoint docs repeat "Returns a plain text error message".'
+  rest_other:
+    media_type: application/json
+    shape: '{ "error": "<message>" }'
+    evidence: 'API overview "Error Response Format" ({"error": "Invalid project user ID format"}) and the rate-limit page ({"error": "Too Many Requests"}).'
+  rest_default:
+    media_type: application/json
+    shape: 'rpcStatus { code: int32, message: string, details: protobufAny[] } (google.rpc.Status)'
+    evidence: components.schemas.rpcStatus is declared in the spec; no operation references it in a response, but it is the grpc-gateway default error shape for this service.
+  a2a:
+    media_type: application/json
+    shape: 'JSON-RPC 2.0 { "jsonrpc": "2.0", "id": ..., "error": { "code": <int>, "message": <string> } }'
+  observed:
+  - {status: 401, body: 'Missing API key', content_type: text/plain, url: 'POST https://api.clix.so/a2a (no key)', headers: [x-request-id], fetched: '2026-09-19'}
+  - {status: 401, body: 'Missing project id', content_type: text/plain, url: 'POST https://api.clix.so/api/v1/messages:send (no headers)', headers: [x-request-id], fetched: '2026-09-19'}
+  - {status: 404, body: '', url: 'GET https://api.clix.so/api/v1/health', fetched: '2026-09-19', note: 'The spec declares GET /api/v1/health (ClixExternalService_HealthCheck) but the anonymous GET returned an empty 404, so either the route requires the auth headers or it is not exposed at the gateway. Not credited as a working health endpoint.'}
+  - {status: 405, body: '', url: 'GET https://api.clix.so/a2a', fetched: '2026-09-19', note: 'POST-only.'}
+  - {status: 404, body: 'Asset not found', content_type: text/plain, url: 'https://docs.clix.so/openapi.json', note: 'Docs host static 404; the spec is at /api-reference/openapi.json.'}
+  note: >-
+    Live 401s are text/plain and not the JSON envelope the overview documents, so the envelope varies by
+    layer (edge/auth middleware answers in text; application errors answer in JSON). Every observed response
+    carried x-request-id, which is the correlation header the A2A docs name X-Request-ID.
+problem_types:
+- status: 400
+  title: Bad Request — invalid or missing parameters
+  occurrences: 11
+  source_operations: [ClixExternalService_CreateOrUpdateDevices, ClixExternalService_SetProjectUserIdForDevice, ClixExternalService_CreateOrUpdateUsersPropertiesByDeviceId, ClixExternalService_CreateEvents, ClixExternalService_HealthCheck, ClixExternalService_SendPushNotifications, ClixExternalService_CreateUser, ClixExternalService_UpdateUser, ClixExternalService_DeleteUser, ClixExternalService_StartLiveActivities, ClixExternalService_TriggerCampaign]
+  messages:
+  - {text: Project User Id must be provided, operations: [ClixExternalService_CreateUser, ClixExternalService_UpdateUser, ClixExternalService_DeleteUser]}
+  - {text: Campaign Id must be provided, operations: [ClixExternalService_TriggerCampaign]}
+  - {text: Failed to send campaign trigger message, operations: [ClixExternalService_TriggerCampaign]}
+  - {text: Invalid push notification parameters, operations: [ClixExternalService_SendPushNotifications]}
+  - {text: Invalid live activity parameters, operations: [ClixExternalService_StartLiveActivities]}
+  - {text: Invalid project user ID format, operations: [documented in the API overview example]}
+  remediation: 'Check request parameters, headers, and body format. Refer to endpoint documentation. (overview) Do not retry a 4xx unchanged — the docs'' retry helper stops on status < 500.'
+- status: 401
+  title: Unauthorized — missing or invalid X-Clix-Project-ID / X-Clix-API-Key (REST) or X-API-Key (A2A)
+  occurrences: 11
+  source_operations: [all operations (global security requirement); documented per endpoint as "Authentication failed or invalid API key"]
+  observed: ['Missing API key (a2a)', 'Missing project id (REST)']
+  remediation: 'Verify API key and Project ID are correct and valid. Use a SECRET key for server-side operations (user management, message sending, campaign triggering) and for /a2a, which rejects public keys.'
+- status: 404
+  title: Not Found — resource does not exist
+  occurrences: 1
+  source_operations: [ClixExternalService_UpdateUser]
+  note: 'Update returns an EMPTY body with 404 when the project_user_id is unknown. Delete deliberately does NOT 404 — "it returns 200 OK even if the user doesn''t exist".'
+  remediation: The resource (user, campaign, etc.) doesn't exist. Verify the resource ID.
+- status: 409
+  title: Conflict — idempotency key in progress or reused with a different body (A2A SendMessage only)
+  occurrences: 1
+  source_operations: [A2A SendMessage]
+  body: JSON-RPC error with code -32603
+  remediation: Wait for the original request to finish, or use a fresh X-Clix-Idempotency-Key when the body has genuinely changed.
+- status: 429
+  title: Too Many Requests — token bucket exhausted (1,000 requests / second / project)
+  occurrences: 11
+  body: '{"error": "Too Many Requests"}'
+  headers: [X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, 'Retry-After: 1']
+  remediation: Back off until X-RateLimit-Reset / Retry-After; see rate-limits/clix-so-rate-limits.yml.
+- status: 500
+  title: Internal Server Error
+  remediation: Temporary server issue. Implement exponential backoff and retry (1s, 2s, 4s).
+- status: 503
+  title: Service Unavailable
+  remediation: Scheduled maintenance or temporary outage. Retry after a delay; check https://clix.so/status.
+- status: timeout
+  title: Request terminated after 100 seconds
+  remediation: 'API requests have a maximum execution time of 100 seconds ... Ensure your integration handles timeouts gracefully.'
+a2a_error_codes:
+  transport: JSON-RPC 2.0 over POST https://api.clix.so/a2a
+  standard:
+  - {code: -32700, name: Parse Error, description: Invalid JSON}
+  - {code: -32600, name: Invalid Request, description: Invalid JSON-RPC 2.0 payload}
+  - {code: -32601, name: Method Not Found, description: Unknown method}
+  - {code: -32602, name: Invalid Params, description: Missing or invalid params}
+  - {code: -32603, name: Internal Error, description: 'Internal processing failure — also the code carried on HTTP 409 idempotency conflicts'}
+  a2a_specific:
+  - {code: -32001, name: Task Not Found, description: Unknown task ID}
+  - {code: -32002, name: Task Not Cancelable, description: Task is already terminal}
+  - {code: -32003, name: Push Notification Not Supported, description: Push notifications are unavailable}
+  - {code: -32004, name: Unsupported Operation, description: Unsupported method or flow}
+  - {code: -32005, name: Content Type Not Supported, description: Unsupported Content-Type}
+  - {code: -32006, name: Invalid Agent Response, description: Invalid agent response}
+  - {code: -32007, name: Skill Not Found, description: Unknown skill ID}
+delivery_errors:
+  note: >-
+    Upstream push-provider errors surfaced in the console and in delivery results (DeliveryResult.status
+    DELIVERY_RESULT_STATUS_FAILED with additional_params.failure_reason). These are FCM/APNs gRPC status names,
+    documented on the troubleshooting page.
+  codes:
+  - {code: '[PERMISSION_DENIED] SenderId mismatch', cause: 'Service Account and client GoogleService-Info.plist / google-services.json are from different Firebase projects', fix: 'Use files from the same Firebase project'}
+  - {code: '[UNKNOWN] Unknown error while making a remote service call', cause: 'Unexpected internal error at Clix', fix: 'Retry; contact support if it persists'}
+  - {code: '[UNAUTHENTICATED] Auth error from APNs or Web Push Service', cause: 'App signing / APNs .p8 key not correctly registered in Firebase', fix: 'Register the APNs key in the Firebase console'}
+  - {code: '[INVALID_ARGUMENT] Request contains an invalid argument.', cause: 'Invalid or expired device token, or APNs key / bundle ID mismatch', fix: 'Verify token, .p8 key ID / team ID, bundle ID and Firebase settings'}
+  - {code: '[UNAUTHENTICATED] Request is missing required authentication credential', cause: '.p8 file not uploaded to Firebase or invalid', fix: 'Upload a valid APNs authentication key (.p8)'}

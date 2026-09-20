@@ -1,0 +1,206 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/clix-so-openapi.yml
+docs:
+- https://docs.clix.so/essentials/user
+- https://docs.clix.so/user-management/user-management
+- https://docs.clix.so/campaigns/types
+summary: 'Clix''s data core is small: a Project (implicit in the X-Clix-Project-ID header) owns Users, each User has many Devices, Devices and Users emit Events,
+  and messages are addressed to a Target that is exactly one of project_user_id / device_id / user_id. Campaigns exist only as an id in the REST contract (they are
+  authored in the console); a trigger returns a trigger_id. The spec''s 39 schemas are request/response wrappers around eight entities; the $ref graph below is computed
+  from the spec and the relationships are read from the id-reference fields (user_id on Device and Event, device_id on Event and DeliveryResult) plus the docs'' user
+  model.'
+entities:
+- name: Project
+  schema: null
+  identity: X-Clix-Project-ID header
+  note: Never a body field; tenancy is the header. Rate limits and API keys are per project.
+- name: User
+  schema: v1User
+  fields:
+  - id
+  - project_user_id
+  - properties
+  identity: id (Clix uuid) and project_user_id (customer id, unique per project)
+  docs_note: Identified users have a project_user_id; anonymous users have only an anonymous_id (docs); on sign-in the anonymous history is merged into the identified
+    user.
+- name: UserProperty
+  schema: clixexternalv1UserProperty
+  fields:
+  - name
+  - type (USER_PROPERTY_TYPE_STRING|NUMBER|BOOLEAN)
+  - value
+- name: Device
+  schema: clixexternalv1Device
+  fields:
+  - id
+  - user_id
+  - model
+  - manufacturer
+  - platform
+  - os_name
+  - os_version
+  - app_name
+  - app_version
+  - sdk_type
+  - sdk_version
+  - ad_id
+  - locale_region
+  - locale_language
+  - timezone
+  - is_push_permission_granted
+  - push_token
+  - push_token_type
+  identity: id (uuid)
+- name: Event
+  schema: v1Event
+  fields:
+  - user_id
+  - device_id
+  - name
+  - event_property {message_id, custom_properties}
+  note: event_property.message_id links an event (e.g. PUSH_NOTIFICATION_TAPPED) back to the message that caused it.
+- name: PushNotification
+  schema: clixexternalv1PushNotification
+  fields:
+  - target
+  - title
+  - body
+  - image_url
+  - landing_url
+  note: A send request item; the persisted counterpart is identified by DeliveryResult.message_id.
+- name: Target
+  schema: clixexternalv1PushNotificationTarget / clixexternalv1LiveActivityTarget
+  fields:
+  - oneOf project_user_id | device_id | user_id
+- name: DeliveryResult
+  schema: clixexternalv1DeliveryResult
+  fields:
+  - message_id
+  - status (DELIVERY_RESULT_STATUS_SUCCEED|FAILED)
+  - additional_params {device_id, fcm_message_id, failure_reason}
+- name: LiveActivity
+  schema: clixexternalv1LiveActivity
+  fields:
+  - target
+  - attributes_type
+  - attributes
+  - content_state
+  - alert {title, body}
+- name: Campaign
+  schema: null
+  identity: campaign_id path parameter
+  note: Authored in the console (scheduled, event-triggered or API-triggered); the API only triggers it. v1TriggerCampaignRequest {audience {broadcast, targets[]},
+    properties} -> v1TriggerCampaignResponse {trigger_id}.
+- name: CampaignTrigger
+  schema: v1TriggerCampaignResponse
+  fields:
+  - trigger_id
+  note: Tracks one trigger call; delivery is asynchronous.
+relationships:
+- from: Project
+  to: User
+  type: has_many
+  via: X-Clix-Project-ID header scopes project_user_id
+- from: User
+  to: Device
+  type: has_many
+  via: Device.user_id
+- from: Device
+  to: User
+  type: belongs_to
+  via: user_id; set with SetProjectUserIdForDevice
+- from: User
+  to: UserProperty
+  type: has_many
+  via: User.properties / CreateOrUpdateUsersPropertiesByDeviceId
+- from: Device
+  to: Event
+  type: has_many
+  via: Event.device_id
+- from: User
+  to: Event
+  type: has_many
+  via: Event.user_id
+- from: Event
+  to: PushNotification
+  type: belongs_to
+  via: event_property.message_id (optional)
+- from: PushNotification
+  to: Target
+  type: has_one
+  via: target (oneOf)
+- from: Target
+  to: User
+  type: belongs_to
+  via: project_user_id or user_id
+- from: Target
+  to: Device
+  type: belongs_to
+  via: device_id
+- from: PushNotification
+  to: DeliveryResult
+  type: has_many
+  via: DeliveryResult.message_id + additional_params.device_id (one per resolved device)
+- from: LiveActivity
+  to: Target
+  type: has_one
+  via: target (oneOf)
+- from: LiveActivity
+  to: DeliveryResult
+  type: has_many
+  via: StartLiveActivitiesResponse.delivery_results
+- from: Campaign
+  to: CampaignTrigger
+  type: has_many
+  via: TriggerCampaign -> trigger_id
+- from: CampaignTrigger
+  to: Target
+  type: has_many
+  via: audience.targets[] (project_user_id | device_id)
+id_conventions:
+  user.id / device.id / message_id / trigger_id: uuid strings (examples 5dbdd10e-6ea6-4ff7-836d-bd30a6d1a521)
+  project_user_id: customer-defined string, unique per project, reusable after delete
+  anonymous_id: assigned by Clix to every user (docs), not exposed in the REST schemas
+schema_ref_graph:
+  schema_count: 39
+  edges:
+  - from: ClixExternalServiceCreateOrUpdateUsersPropertiesByDeviceIdBody
+    to: clixexternalv1UserProperty
+  - from: CreateEventsRequestEventForRequest
+    to: clixexternalv1EventProperty
+  - from: clixexternalv1DeliveryResult
+    to: clixexternalv1DeliveryResultAdditionalParams
+  - from: clixexternalv1DeliveryResult
+    to: clixexternalv1DeliveryResultStatus
+  - from: clixexternalv1LiveActivity
+    to: clixexternalv1LiveActivityAlert
+  - from: clixexternalv1LiveActivity
+    to: clixexternalv1LiveActivityTarget
+  - from: clixexternalv1PushNotification
+    to: clixexternalv1PushNotificationTarget
+  - from: clixexternalv1UserProperty
+    to: clixexternalv1UserPropertyType
+  - from: rpcStatus
+    to: protobufAny
+  - from: v1CreateEventsRequest
+    to: CreateEventsRequestEventForRequest
+  - from: v1CreateEventsResponse
+    to: v1Event
+  - from: v1CreateOrUpdateDevicesRequest
+    to: CreateOrUpdateDevicesRequestDeviceForRequest
+  - from: v1CreateOrUpdateDevicesResponse
+    to: clixexternalv1Device
+  - from: v1CreateOrUpdateUsersPropertiesByDeviceIdResponse
+    to: clixexternalv1UserProperty
+  - from: v1Event
+    to: clixexternalv1EventProperty
+  - from: v1SendPushNotificationsRequest
+    to: clixexternalv1PushNotification
+  - from: v1SendPushNotificationsResponse
+    to: clixexternalv1DeliveryResult
+  - from: v1StartLiveActivitiesRequest
+    to: clixexternalv1LiveActivity
+  - from: v1StartLiveActivitiesResponse
+    to: clixexternalv1DeliveryResult
+render: null

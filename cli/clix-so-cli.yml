@@ -1,0 +1,52 @@
+generated: '2026-09-19'
+method: searched
+source: https://docs.clix.so/clix-cli
+docs: https://docs.clix.so/clix-cli
+site: https://clix.sh/
+repo: https://github.com/clix-so/clix-cli
+package: '@clix-so/clix-cli'
+version: 1.1.3
+published: '2026-07-04'
+license: MIT (package.json); repo LICENSE is "MIT License with Custom Restrictions"
+description: >-
+  Clix CLI is an AI-agent-driven installer for the Clix Mobile SDK rather than a general API client: it
+  prepares the project (Firebase, APNs, entitlements), then hands off to a third-party AI coding agent to
+  finish the SDK integration, and it installs the Clix MCP server and Clix agent skills into that agent.
+  It does not expose the REST API operations (no send/trigger/user commands); those are in the SDKs, the
+  REST API and the A2A agent. The binary itself is catalogued in packages/clix-so-packages.yml.
+requirements:
+  node: '>= 20'
+  agent: 'one supported AI agent — Gemini CLI, GitHub Copilot, OpenCode, Cursor, Claude Code, Codex'
+install:
+  npm: npm install -g @clix-so/clix-cli
+  bun: bun add -g @clix-so/clix-cli
+  shell: curl -fsSL https://clix.sh/install | bash
+  homebrew: brew tap clix-so/clix-cli && brew install clix
+binary: clix
+auth:
+  command: clix login
+  flow: device flow against the Clix account (console)
+  note: 'Human login for the CLI session; unrelated to the API-key headers the REST API uses.'
+commands:
+  core:
+  - {name: install, description: 'Auto-configure push notifications: prepares Firebase/APNs/entitlements, then hands off to the selected AI agent for SDK installation.'}
+  - {name: doctor, description: 'Diagnose the project''s Clix SDK integration; checks configuration completeness, then hands off to the AI agent for analysis and fixes.'}
+  - {name: mcp, description: Install the Clix MCP Server so AI agents can access real-time Clix documentation and SDK code examples.}
+  - {name: skills, description: 'Install Clix Skills for the AI agent (SDK integration, event tracking, user management, ...).'}
+  utility:
+  - {name: login, description: Authenticate with your Clix account via device flow.}
+  - {name: logout, description: Remove stored credentials.}
+  - {name: whoami, description: Show the current logged-in user.}
+  - {name: 'agent [name]', description: List available agents or switch to a specific agent (e.g. clix agent gemini).}
+  - {name: update, description: 'Check for and apply CLI updates; --dry-run previews.'}
+  - {name: uninstall, description: 'Remove the CLI; --keep-config keeps configuration files.'}
+  - {name: help, description: Show available commands.}
+key_flows:
+- name: Zero-to-push
+  steps: ['curl -fsSL https://clix.sh/install | bash', clix login, clix install]
+- name: Give an agent Clix context
+  steps: [clix mcp, clix skills]
+features: [Command-mode architecture (no interactive chat), two-step install then agent handoff, six-agent support with switching, platform detection (iOS/Android/React Native/Flutter), self-update aware of the install method]
+distribution:
+  homebrew_cask: https://github.com/clix-so/homebrew-clix-cli/blob/main/Casks/clix.rb
+  note: 'The cask ships unsigned darwin arm64/x64 binaries from the GitHub release and strips the quarantine attribute post-install.'

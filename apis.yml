@@ -31,6 +31,19 @@ tags:
 - A2A
 - MCP
 - Agents
+- SDK
+- United States
+- Company
+tags_raw:
+- Push Notifications
+- Mobile
+- Messaging
+- Campaigns
+- Event Tracking
+- Customer Engagement
+- A2A
+- MCP
+- Agents
 - SDKs
 - United States
 - Company
@@ -47,6 +60,13 @@ apis:
   humanURL: https://docs.clix.so/api-reference/overview
   baseURL: https://api.clix.so
   tags:
+  - Push Notifications
+  - User
+  - Devices
+  - Event
+  - Campaigns
+  - Live Activities
+  tags_raw:
   - Push Notifications
   - Users
   - Devices

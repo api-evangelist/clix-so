@@ -12,6 +12,22 @@ description: 'Clix is a US-based, developer-first mobile push notification platf
   (@clix-so/clix-mcp-server) plus a Mintlify docs MCP endpoint — both documentation-only — an open agent-skills
   repo, first-party SDKs on Maven Central, CocoaPods/SwiftPM, pub.dev and npm, a self-hosted status page with a
   published 99.5% monthly SLO, and console-configured PUSH_SENT/PUSH_FAILED webhooks.'
+deliveryModel:
+  model: saas
+  license_evidence:
+    not_product:
+    - clix-so/clix-mcp-server
+  open_source: unknown
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: low
+  source:
+  - openapi
+  - pricing
+  - repository-not-product
+  generated: '2026-09-25'
+  method: derived
 image: https://clix.so/opengraph-image?04675f86137dbf70
 url: https://raw.githubusercontent.com/api-evangelist/clix-so/refs/heads/main/apis.yml
 x-type: company
@@ -21,6 +37,9 @@ x-tier-reason: enrichment pass 2026-09-19 (local-v3; was a2a-registry harvest st
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
+x-docs-platform: mintlify
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-24
 tags:
 - Push Notifications
 - Mobile
@@ -48,60 +67,26 @@ tags_raw:
 - United States
 - Company
 apis:
-- aid: clix-so:clix-external-api
-  name: Clix External API
-  description: 'Server-to-server REST API for Clix mobile push: create/update/delete project users and their properties,
-    register devices and bind them to users, ingest events, send ad-hoc push notifications to one or more targets
-    (project_user_id | device_id | user_id), start iOS Live Activities, and trigger API-triggered campaigns with
-    dynamic properties. 11 operations under https://api.clix.so/api/v1, published as OpenAPI 3.1.0 (grpc-gateway
-    output of clix/external/v1/clix.proto) at https://docs.clix.so/api-reference/openapi.json. Two API-key headers
-    on every call; 1,000 requests/second/project token bucket with X-RateLimit-* and Retry-After headers; JSON only;
-    no idempotency key on REST writes.'
-  humanURL: https://docs.clix.so/api-reference/overview
-  baseURL: https://api.clix.so
-  tags:
-  - Push Notifications
-  - User
-  - Devices
-  - Event
-  - Campaigns
-  - Live Activities
-  tags_raw:
-  - Push Notifications
-  - Users
-  - Devices
-  - Events
-  - Campaigns
-  - Live Activities
-  properties:
-  - type: OpenAPI
-    url: openapi/clix-so-openapi.yml
-  - type: OpenAPI
-    name: Clix External API OpenAPI (provider-hosted)
-    url: https://docs.clix.so/api-reference/openapi.json
-  - type: Documentation
-    url: https://docs.clix.so/api-reference/overview
-  - type: APIReference
-    url: https://docs.clix.so/api-reference/overview
-  - type: RateLimits
-    url: https://docs.clix.so/api-reference/rate-limits
-  - type: Overlay
-    url: overlays/clix-so-openapi-overlay.yaml
-  - type: Webhooks
-    url: https://docs.clix.so/integrations/webhook
 - aid: clix-so:clix-a2a-agent
   name: Clix A2A Agent
-  description: 'Agent2Agent (A2A) protocol surface: a public agent card at https://api.clix.so/.well-known/agent-card.json
-    (0.3.0 shape by default, 1.0 shape under the A2A-Version: 1.0 header; graded conformant) and a JSON-RPC 2.0
-    endpoint at POST https://api.clix.so/a2a authenticated with a secret X-API-Key (clix_sk_ prefix). Four built-in
-    skills — create-user, track-event, send-push-notification, trigger-campaign — each a projection of one REST
-    operation, executed as tasks with SendMessage / SendStreamingMessage (SSE), GetTask, ListTasks (cursor pagination),
-    CancelTask, task webhooks (CreateTaskPushNotificationConfig) and an authenticated extended card. Adds what the
-    REST layer lacks: X-Clix-Idempotency-Key replay protection with 409 semantics and X-Request-ID tracing. The
-    anonymous endpoint answers 401 Missing API key.'
+  description: >-
+    Agent2Agent (A2A) protocol surface: a public agent card at https://api.clix.so/.well-known/agent-card.json
+    (0.3.0 shape by default, 1.0 shape under the A2A-Version: 1.0 header; graded conformant) and a JSON-RPC
+    2.0 endpoint at POST https://api.clix.so/a2a authenticated with a secret X-API-Key (clix_sk_ prefix).
+    Four built-in skills — create-user, track-event, send-push-notification, trigger-campaign — each a
+    projection of one REST operation, executed as tasks with SendMessage / SendStreamingMessage (SSE),
+    GetTask, ListTasks (cursor pagination), CancelTask, task webhooks (CreateTaskPushNotificationConfig)
+    and an authenticated extended card. Adds what the REST layer lacks: X-Clix-Idempotency-Key replay
+    protection with 409 semantics and X-Request-ID tracing. The anonymous endpoint answers 401 Missing
+    API key.
   humanURL: https://docs.clix.so/a2a/overview
   baseURL: https://api.clix.so/a2a
   tags:
+  - A2A
+  - Agents
+  - Agent-Native
+  - Push Notifications
+  tags_raw:
   - A2A
   - Agents
   - agent-native
@@ -122,12 +107,13 @@ apis:
     url: mcp/clix-so-tool-crosswalk.yml
 - aid: clix-so:clix-mcp-server
   name: Clix MCP Server
-  description: 'Model Context Protocol surfaces, both documentation-only: the provider''s stdio server @clix-so/clix-mcp-server
-    0.1.4 (npx -y @clix-so/clix-mcp-server@latest; tools search_docs and search_sdk over the docs llms.txt and the
-    four SDK repos; installed by `clix mcp`), and a Mintlify-served Streamable HTTP endpoint at https://docs.clix.so/mcp
-    that answers initialize and tools/list anonymously (protocol 2025-06-18; search_clix_documentation, query_docs_filesystem_clix_documentation,
-    submit_feedback; resource mintlify://skills/clix). Neither executes Clix operations — the docs direct agents
-    to A2A for that.'
+  description: >-
+    Model Context Protocol surfaces, both documentation-only: the provider's stdio server @clix-so/clix-mcp-server
+    0.1.4 (npx -y @clix-so/clix-mcp-server@latest; tools search_docs and search_sdk over the docs llms.txt
+    and the four SDK repos; installed by `clix mcp`), and a Mintlify-served Streamable HTTP endpoint at
+    https://docs.clix.so/mcp that answers initialize and tools/list anonymously (protocol 2025-06-18;
+    search_clix_documentation, query_docs_filesystem_clix_documentation, submit_feedback; resource mintlify://skills/clix).
+    Neither executes Clix operations — the docs direct agents to A2A for that.
   humanURL: https://docs.clix.so/mcp-server/clix-mcp-server
   baseURL: https://docs.clix.so/mcp
   tags:
@@ -146,12 +132,32 @@ apis:
     url: https://github.com/clix-so/clix-mcp-server
   - type: ToolCrosswalk
     url: mcp/clix-so-tool-crosswalk.yml
+- aid: clix-so:clix-so-clixexternalservice-api
+  name: Clix Clix External Service API
+  description: The ClixExternalService API from Clix — 10 operation(s) for clixexternalservice.
+  humanURL: https://docs.clix.so/api-reference/overview
+  baseURL: https://api.clix.so
+  tags:
+  - ClixExternalService
+  properties:
+  - type: OpenAPI
+    url: openapi/clix-so-clixexternalservice-api-openapi.yml
+  - type: Documentation
+    url: https://docs.clix.so/api-reference/overview
+  - type: APIReference
+    url: https://docs.clix.so/api-reference/overview
+  - type: RateLimits
+    url: https://docs.clix.so/api-reference/rate-limits
+  - type: Webhooks
+    url: https://docs.clix.so/integrations/webhook
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/clix-so-openapi-overlay.yaml
 - type: Website
   url: https://clix.so/
 - type: DeveloperPortal
@@ -238,3 +244,10 @@ x-enrichment:
   status: enriched
   artifacts_added: 27
   pass: local-v3
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://api.clix.so/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "0.3.0"
+  control: 404

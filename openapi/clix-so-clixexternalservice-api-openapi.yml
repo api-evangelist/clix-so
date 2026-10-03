@@ -1,8 +1,7 @@
 openapi: 3.2.0
 info:
-  title: Clix So Clix External Service API
+  title: clix/external/v1/clix.proto Clix External Service API
   version: version not set
-  description: 'Operations tagged ClixExternalService across 2 of this provider''s published API definitions: clix-so-external-v1-openapi.json, clix-so-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.clix.so
 security:
@@ -37,8 +36,6 @@ paths:
               $ref: '#/components/schemas/v1CreateOrUpdateDevicesRequest'
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
   /api/v1/devices/{deviceId}/user/project-user-id:
     post:
       operationId: ClixExternalService_SetProjectUserIdForDevice
@@ -72,8 +69,6 @@ paths:
       - ClixExternalService
       summary: Clix external service set project user id for device
       x-summary-source: derived
-    servers:
-    - url: https://api.clix.so
   /api/v1/devices/{deviceId}/user/properties:
     post:
       summary: UserProperty
@@ -106,8 +101,6 @@ paths:
               $ref: '#/components/schemas/ClixExternalServiceCreateOrUpdateUsersPropertiesByDeviceIdBody'
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
   /api/v1/events:
     post:
       summary: Event
@@ -134,8 +127,6 @@ paths:
               $ref: '#/components/schemas/v1CreateEventsRequest'
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
   /api/v1/health:
     get:
       operationId: ClixExternalService_HealthCheck
@@ -150,8 +141,6 @@ paths:
       - ClixExternalService
       summary: Clix external service health check
       x-summary-source: derived
-    servers:
-    - url: https://api.clix.so
   /api/v1/messages:send:
     post:
       summary: Send push notifications to user devices
@@ -180,8 +169,6 @@ paths:
               $ref: '#/components/schemas/v1SendPushNotificationsRequest'
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
   /api/v1/users:
     post:
       summary: Create a new user
@@ -210,8 +197,6 @@ paths:
               $ref: '#/components/schemas/v1CreateUserRequest'
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
   /api/v1/users/{project_user_id}:
     patch:
       summary: Update an existing user
@@ -277,8 +262,6 @@ paths:
                 example: Project User Id must be provided
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
   /api/v1/live-activities:start:
     post:
       summary: Start Live Activities on user devices
@@ -307,8 +290,6 @@ paths:
               $ref: '#/components/schemas/v1StartLiveActivitiesRequest'
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
   /api/v1/campaigns/{campaign_id}:trigger:
     post:
       summary: Trigger a campaign
@@ -344,15 +325,23 @@ paths:
               $ref: '#/components/schemas/v1TriggerCampaignRequest'
       tags:
       - ClixExternalService
-    servers:
-    - url: https://api.clix.so
 components:
   schemas:
-    ClixExternalServiceSetProjectUserIdForDeviceBody:
+    v1SetProjectUserIdForDeviceResponse:
       type: object
       properties:
+        device_id:
+          type: string
         project_user_id:
           type: string
+    v1CreateEventsRequest:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/CreateEventsRequestEventForRequest'
     clixexternalv1DeliveryResultAdditionalParams:
       type: object
       properties:
@@ -362,6 +351,101 @@ components:
           type: string
         failure_reason:
           type: string
+    clixexternalv1PushNotificationTarget:
+      type: object
+      description: Target information for the push notification. Only one of project_user_id, device_id, or user_id should be present.
+      oneOf:
+      - properties:
+          project_user_id:
+            type: string
+            description: Project-specific user ID for targeting.
+        required:
+        - project_user_id
+      - properties:
+          device_id:
+            type: string
+            description: ID of the target device.
+        required:
+        - device_id
+      - properties:
+          user_id:
+            type: string
+            description: ID of the target user.
+        required:
+        - user_id
+    clixexternalv1Device:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        model:
+          type: string
+        manufacturer:
+          type: string
+        platform:
+          type: string
+        os_name:
+          type: string
+        os_version:
+          type: string
+        app_name:
+          type: string
+        app_version:
+          type: string
+        sdk_type:
+          type: string
+        sdk_version:
+          type: string
+        ad_id:
+          type: string
+        locale_region:
+          type: string
+        locale_language:
+          type: string
+        timezone:
+          type: string
+        is_push_permission_granted:
+          type: boolean
+        push_token:
+          type: string
+        push_token_type:
+          type: string
+    v1TriggerCampaignResponse:
+      type: object
+      description: Response containing the trigger ID
+      properties:
+        trigger_id:
+          type: string
+          description: Unique identifier for this campaign trigger
+    v1TriggerCampaignRequest:
+      type: object
+      description: Request to trigger a campaign
+      properties:
+        audience:
+          type: object
+          description: Target audience for the campaign
+          properties:
+            broadcast:
+              type: boolean
+              description: If true, sends to all eligible users
+            targets:
+              type: array
+              description: Specific targets to send to
+              items:
+                type: object
+                properties:
+                  project_user_id:
+                    type: string
+                    description: Target user by project user ID
+                  device_id:
+                    type: string
+                    description: Target specific device
+        properties:
+          type: object
+          description: Custom properties for personalization
+          additionalProperties: true
     v1CreateEventsResponse:
       type: object
       properties:
@@ -370,21 +454,126 @@ components:
           items:
             type: object
             $ref: '#/components/schemas/v1Event'
-    v1SetProjectUserIdForDeviceResponse:
+    clixexternalv1HealthCheckResponse:
+      type: object
+      properties:
+        msg:
+          type: string
+    clixexternalv1PushNotification:
+      type: object
+      description: A push notification to be sent to a user device.
+      properties:
+        target:
+          $ref: '#/components/schemas/clixexternalv1PushNotificationTarget'
+          description: Target device and/or user for the push notification.
+        title:
+          type: string
+          description: Title of the push notification.
+        body:
+          type: string
+          description: Body content of the push notification.
+        image_url:
+          type: string
+          description: URL of the image to display in the push notification (optional).
+        landing_url:
+          type: string
+          description: URL to open when the notification is clicked (optional).
+    CreateEventsRequestEventForRequest:
       type: object
       properties:
         device_id:
           type: string
+        name:
+          type: string
+        event_property:
+          $ref: '#/components/schemas/clixexternalv1EventProperty'
+    v1StartLiveActivitiesRequest:
+      type: object
+      description: Request schema for starting live activities.
+      properties:
+        live_activities:
+          type: array
+          description: List of live activities to start.
+          items:
+            type: object
+            $ref: '#/components/schemas/clixexternalv1LiveActivity'
+    rpcStatus:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/protobufAny'
+    clixexternalv1UserPropertyType:
+      type: string
+      enum:
+      - USER_PROPERTY_TYPE_STRING
+      - USER_PROPERTY_TYPE_NUMBER
+      - USER_PROPERTY_TYPE_BOOLEAN
+      default: USER_PROPERTY_TYPE_STRING
+    v1CreateOrUpdateDevicesResponse:
+      type: object
+      properties:
+        devices:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/clixexternalv1Device'
+    clixexternalv1LiveActivity:
+      type: object
+      description: A live activity to be started on a user device.
+      properties:
+        target:
+          $ref: '#/components/schemas/clixexternalv1LiveActivityTarget'
+          description: Target device and/or user for the live activity.
+        attributes_type:
+          type: string
+          description: The name of the ActivityAttributes type defined in your iOS app (e.g., 'DeliveryAttributes').
+        attributes:
+          type: object
+          description: Initial values for ActivityAttributes (static data that doesn't change).
+          additionalProperties: true
+        content_state:
+          type: object
+          description: Initial values for ContentState (dynamic data that updates in real-time).
+          additionalProperties: true
+        alert:
+          $ref: '#/components/schemas/clixexternalv1LiveActivityAlert'
+          description: 'Push notification alert displayed when the Live Activity starts. If not provided, defaults to title: ''Live Activity'', body: ''Started''.'
+      required:
+      - target
+      - attributes_type
+      - attributes
+      - content_state
+    v1SendPushNotificationsRequest:
+      type: object
+      description: Request schema for sending push notifications.
+      properties:
+        push_notifications:
+          type: array
+          description: List of push notifications to send. (We recommend sending up to 500 push notifications.)
+          items:
+            type: object
+            $ref: '#/components/schemas/clixexternalv1PushNotification'
+    ClixExternalServiceSetProjectUserIdForDeviceBody:
+      type: object
+      properties:
         project_user_id:
           type: string
-    v1UpdateUserResponse:
+    v1CreateOrUpdateDevicesRequest:
       type: object
-      description: Response containing the updated user properties
       properties:
-        properties:
-          type: object
-          description: User properties as key-value pairs
-          additionalProperties: true
+        devices:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/CreateOrUpdateDevicesRequestDeviceForRequest'
     CreateOrUpdateDevicesRequestDeviceForRequest:
       type: object
       properties:
@@ -435,53 +624,6 @@ components:
           additionalProperties: true
       required:
       - project_user_id
-    v1CreateUserResponse:
-      type: object
-      description: Response containing the created user properties
-      properties:
-        properties:
-          type: object
-          description: User properties as key-value pairs
-          additionalProperties: true
-    protobufAny:
-      type: object
-      properties:
-        '@type':
-          type: string
-      additionalProperties: {}
-    v1Event:
-      type: object
-      properties:
-        user_id:
-          type: string
-        device_id:
-          type: string
-        name:
-          type: string
-        event_property:
-          $ref: '#/components/schemas/clixexternalv1EventProperty'
-    clixexternalv1PushNotificationTarget:
-      type: object
-      description: Target information for the push notification. Only one of project_user_id, device_id, or user_id should be present.
-      oneOf:
-      - properties:
-          project_user_id:
-            type: string
-            description: Project-specific user ID for targeting.
-        required:
-        - project_user_id
-      - properties:
-          device_id:
-            type: string
-            description: ID of the target device.
-        required:
-        - device_id
-      - properties:
-          user_id:
-            type: string
-            description: ID of the target user.
-        required:
-        - user_id
     v1UpdateUserRequest:
       type: object
       description: Request to update a user
@@ -490,45 +632,47 @@ components:
           type: object
           description: User properties to update as key-value pairs
           additionalProperties: true
-    clixexternalv1EventProperty:
+    clixexternalv1LiveActivityAlert:
       type: object
+      description: Alert notification displayed when starting a Live Activity.
       properties:
-        message_id:
+        title:
           type: string
-        custom_properties:
-          type: object
-          additionalProperties: {}
-    clixexternalv1DeliveryResult:
-      type: object
-      description: Result of a push notification delivery attempt.
-      properties:
-        message_id:
+          description: Title of the alert notification.
+        body:
           type: string
-          description: Unique ID of the push notification message.
-        status:
-          $ref: '#/components/schemas/clixexternalv1DeliveryResultStatus'
-          description: Delivery status of the push notification.
-        additional_params:
-          $ref: '#/components/schemas/clixexternalv1DeliveryResultAdditionalParams'
-          description: Additional parameters related to the delivery result.
-    v1SendPushNotificationsRequest:
+          description: Body content of the alert notification.
+      required:
+      - title
+      - body
+    protobufAny:
       type: object
-      description: Request schema for sending push notifications.
       properties:
-        push_notifications:
+        '@type':
+          type: string
+      additionalProperties: {}
+    clixexternalv1DeliveryResultStatus:
+      type: string
+      enum:
+      - DELIVERY_RESULT_STATUS_SUCCEED
+      - DELIVERY_RESULT_STATUS_FAILED
+    clixexternalv1UserProperty:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/clixexternalv1UserPropertyType'
+        value:
+          type: string
+    v1CreateOrUpdateUsersPropertiesByDeviceIdResponse:
+      type: object
+      properties:
+        properties:
           type: array
-          description: List of push notifications to send. (We recommend sending up to 500 push notifications.)
           items:
             type: object
-            $ref: '#/components/schemas/clixexternalv1PushNotification'
-    v1CreateOrUpdateDevicesRequest:
-      type: object
-      properties:
-        devices:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/CreateOrUpdateDevicesRequestDeviceForRequest'
+            $ref: '#/components/schemas/clixexternalv1UserProperty'
     clixexternalv1LiveActivityTarget:
       type: object
       description: Target information for the live activity. Only one of project_user_id, device_id, or user_id should be present.
@@ -551,99 +695,6 @@ components:
             description: ID of the target user.
         required:
         - user_id
-    rpcStatus:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
-        details:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/protobufAny'
-    clixexternalv1UserProperty:
-      type: object
-      properties:
-        name:
-          type: string
-        type:
-          $ref: '#/components/schemas/clixexternalv1UserPropertyType'
-        value:
-          type: string
-    CreateEventsRequestEventForRequest:
-      type: object
-      properties:
-        device_id:
-          type: string
-        name:
-          type: string
-        event_property:
-          $ref: '#/components/schemas/clixexternalv1EventProperty'
-    clixexternalv1LiveActivity:
-      type: object
-      description: A live activity to be started on a user device.
-      properties:
-        target:
-          $ref: '#/components/schemas/clixexternalv1LiveActivityTarget'
-          description: Target device and/or user for the live activity.
-        attributes_type:
-          type: string
-          description: The name of the ActivityAttributes type defined in your iOS app (e.g., 'DeliveryAttributes').
-        attributes:
-          type: object
-          description: Initial values for ActivityAttributes (static data that doesn't change).
-          additionalProperties: true
-        content_state:
-          type: object
-          description: Initial values for ContentState (dynamic data that updates in real-time).
-          additionalProperties: true
-        alert:
-          $ref: '#/components/schemas/clixexternalv1LiveActivityAlert'
-          description: 'Push notification alert displayed when the Live Activity starts. If not provided, defaults to title: ''Live Activity'', body: ''Started''.'
-      required:
-      - target
-      - attributes_type
-      - attributes
-      - content_state
-    clixexternalv1LiveActivityAlert:
-      type: object
-      description: Alert notification displayed when starting a Live Activity.
-      properties:
-        title:
-          type: string
-          description: Title of the alert notification.
-        body:
-          type: string
-          description: Body content of the alert notification.
-      required:
-      - title
-      - body
-    v1CreateOrUpdateDevicesResponse:
-      type: object
-      properties:
-        devices:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/clixexternalv1Device'
-    clixexternalv1DeliveryResultStatus:
-      type: string
-      enum:
-      - DELIVERY_RESULT_STATUS_SUCCEED
-      - DELIVERY_RESULT_STATUS_FAILED
-    v1StartLiveActivitiesRequest:
-      type: object
-      description: Request schema for starting live activities.
-      properties:
-        live_activities:
-          type: array
-          description: List of live activities to start.
-          items:
-            type: object
-            $ref: '#/components/schemas/clixexternalv1LiveActivity'
     ClixExternalServiceCreateOrUpdateUsersPropertiesByDeviceIdBody:
       type: object
       properties:
@@ -652,102 +703,38 @@ components:
           items:
             type: object
             $ref: '#/components/schemas/clixexternalv1UserProperty'
-    v1CreateOrUpdateUsersPropertiesByDeviceIdResponse:
+    v1UpdateUserResponse:
       type: object
+      description: Response containing the updated user properties
       properties:
         properties:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/clixexternalv1UserProperty'
-    v1CreateEventsRequest:
-      type: object
-      properties:
-        events:
-          type: array
-          items:
-            type: object
-            $ref: '#/components/schemas/CreateEventsRequestEventForRequest'
-    v1TriggerCampaignResponse:
-      type: object
-      description: Response containing the trigger ID
-      properties:
-        trigger_id:
-          type: string
-          description: Unique identifier for this campaign trigger
-    clixexternalv1UserPropertyType:
-      type: string
-      enum:
-      - USER_PROPERTY_TYPE_STRING
-      - USER_PROPERTY_TYPE_NUMBER
-      - USER_PROPERTY_TYPE_BOOLEAN
-      default: USER_PROPERTY_TYPE_STRING
-    v1TriggerCampaignRequest:
-      type: object
-      description: Request to trigger a campaign
-      properties:
-        audience:
           type: object
-          description: Target audience for the campaign
-          properties:
-            broadcast:
-              type: boolean
-              description: If true, sends to all eligible users
-            targets:
-              type: array
-              description: Specific targets to send to
-              items:
-                type: object
-                properties:
-                  project_user_id:
-                    type: string
-                    description: Target user by project user ID
-                  device_id:
-                    type: string
-                    description: Target specific device
-        properties:
-          type: object
-          description: Custom properties for personalization
+          description: User properties as key-value pairs
           additionalProperties: true
-    clixexternalv1Device:
+    v1Event:
       type: object
       properties:
-        id:
-          type: string
         user_id:
           type: string
-        model:
+        device_id:
           type: string
-        manufacturer:
+        name:
           type: string
-        platform:
+        event_property:
+          $ref: '#/components/schemas/clixexternalv1EventProperty'
+    clixexternalv1DeliveryResult:
+      type: object
+      description: Result of a push notification delivery attempt.
+      properties:
+        message_id:
           type: string
-        os_name:
-          type: string
-        os_version:
-          type: string
-        app_name:
-          type: string
-        app_version:
-          type: string
-        sdk_type:
-          type: string
-        sdk_version:
-          type: string
-        ad_id:
-          type: string
-        locale_region:
-          type: string
-        locale_language:
-          type: string
-        timezone:
-          type: string
-        is_push_permission_granted:
-          type: boolean
-        push_token:
-          type: string
-        push_token_type:
-          type: string
+          description: Unique ID of the push notification message.
+        status:
+          $ref: '#/components/schemas/clixexternalv1DeliveryResultStatus'
+          description: Delivery status of the push notification.
+        additional_params:
+          $ref: '#/components/schemas/clixexternalv1DeliveryResultAdditionalParams'
+          description: Additional parameters related to the delivery result.
     v1StartLiveActivitiesResponse:
       type: object
       description: Response schema containing the delivery results for each live activity.
@@ -758,6 +745,14 @@ components:
           items:
             type: object
             $ref: '#/components/schemas/clixexternalv1DeliveryResult'
+    v1CreateUserResponse:
+      type: object
+      description: Response containing the created user properties
+      properties:
+        properties:
+          type: object
+          description: User properties as key-value pairs
+          additionalProperties: true
     v1SendPushNotificationsResponse:
       type: object
       description: Response schema containing the delivery results for each push notification.
@@ -768,30 +763,14 @@ components:
           items:
             type: object
             $ref: '#/components/schemas/clixexternalv1DeliveryResult'
-    clixexternalv1HealthCheckResponse:
+    clixexternalv1EventProperty:
       type: object
       properties:
-        msg:
+        message_id:
           type: string
-    clixexternalv1PushNotification:
-      type: object
-      description: A push notification to be sent to a user device.
-      properties:
-        target:
-          $ref: '#/components/schemas/clixexternalv1PushNotificationTarget'
-          description: Target device and/or user for the push notification.
-        title:
-          type: string
-          description: Title of the push notification.
-        body:
-          type: string
-          description: Body content of the push notification.
-        image_url:
-          type: string
-          description: URL of the image to display in the push notification (optional).
-        landing_url:
-          type: string
-          description: URL to open when the notification is clicked (optional).
+        custom_properties:
+          type: object
+          additionalProperties: {}
   securitySchemes:
     ProjectIdAuth:
       type: apiKey
@@ -803,6 +782,3 @@ components:
       in: header
       name: X-Clix-API-Key
       description: API Key for authentication
-x-refined-from:
-- clix-so-external-v1-openapi.json
-- clix-so-openapi.yml

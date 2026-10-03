@@ -1,23 +1,22 @@
 {
   "provider": "clix-so",
   "sources": [
-    "_original/clix-so-external-v1-openapi.json",
-    "clix-so-openapi.yml"
+    "_original/clix-so-external-v1-openapi.json"
   ],
   "outputs": [
     "clix-so-clixexternalservice-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/clix-so-openapi.yml"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "1 archived document(s) dropped as subsets of other archived documents",
     "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "clix-so-external-v1-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
-    "clix-so-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
-    "tag 'ClixExternalService' spans 2 source specs (clix-so-external-v1-openapi.json, clix-so-openapi.yml): per-path servers applied",
-    "apis.yml register: written (+1 apis, 3 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "_original/clix-so-openapi.yml: archived document superseded by a larger archived document",
+    "clix-so-clixexternalservice-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

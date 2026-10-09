@@ -1,0 +1,29 @@
+# Front Door AI Index — clix-so — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: clix-so
+  lexicon_version: '1.0'
+  probed_at: '2026-09-25'
+  host: clix.so
+  final_host: clix.so
+  ownership: own
+  owner: clix-so
+  shares_host_with: null
+  inherited_from: null
+  alias_of: null
+  verdict: scored
+  score: 1
+  band: 2
+  band_label: trace
+  host_score: 1
+  density: 0.63
+  words: 1590
+  tiers:
+    agentic: 1
+    core: 0
+    model: 0
+  ambiguous: 1
+  top_terms:
+    prompts: 1
+    smart: 1

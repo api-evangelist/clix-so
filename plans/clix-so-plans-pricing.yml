@@ -55,3 +55,32 @@ plans:
 terms:
   overage_clause: '"If you exceed the limits of your plan, we may restrict access or charge overage fees." (Terms of Service)'
   sla: '99.5% monthly SLO for the API and delivery pipeline; a target, not a warranty; no credits (lifecycle/clix-so-lifecycle.yml)'
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  - metered
+  units: []
+  plans:
+  - name: Free
+    access: other
+    model: metered
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Pro
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Enterprise
+    access: other
+    model: unstated
+    model_how: derived
+    units: []
+    periods:
+    - term

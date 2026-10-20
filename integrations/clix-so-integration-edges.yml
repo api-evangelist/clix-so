@@ -38,36 +38,6 @@ edges:
     detected: '2026-10-18'
   detected_by: sweep-official-sdks.py
   first_seen: '2026-10-18'
-- partner_name: npm registry
-  partner: npm
-  partner_match: register
-  type: register
-  direction: provider-built
-  category: official CLI (npm registry)
-  evidence: https://www.npmjs.com/package/@clix-so/clix-cli
-  channel: package-registry
-  relationship: distribution-channel
-  contract_reference:
-    register: npm registry (public package index)
-    spec_file: null
-    packages:
-    - name: '@clix-so/clix-cli'
-      version: 1.1.3
-      released: '2026-07-04'
-      released_field: modified
-      lapsed: false
-      page: https://www.npmjs.com/package/@clix-so/clix-cli
-      cli: bin clix
-      repo_leg: domain:clix.so
-      publisher_leg: email:clix.so
-      matched_by: domain
-    current: true
-    signal_note: 'the provider''s own command-line tool on a package manager: distribution, not an integration;
-      lapsed = no release in 24 months or deprecated / disabled by the manager'
-    detected_by: sweep-official-clis.py
-    detected: '2026-10-20'
-  detected_by: sweep-official-clis.py
-  first_seen: '2026-10-20'
 - partner_name: A2A protocol (own Agent Card)
   partner: null
   partner_match: register
@@ -97,7 +67,7 @@ edges:
     matched_domain: clix.so
     matched_by: own-domain
     detected_by: sweep-ai-agents.py
-    detected: '2026-10-15'
+    detected: '2026-10-19'
   detected_by: sweep-ai-agents.py
   first_seen: '2026-10-15'
 - partner_name: a2aregistry.org
@@ -133,9 +103,106 @@ edges:
     sample_agents:
     - Clix Agent
     detected_by: sweep-ai-agents.py
-    detected: '2026-10-15'
+    detected: '2026-10-19'
   detected_by: sweep-ai-agents.py
   first_seen: '2026-10-15'
+- partner_name: npm registry
+  partner: npm
+  partner_match: register
+  type: register
+  direction: provider-built
+  category: official CLI (npm registry)
+  evidence: https://www.npmjs.com/package/@clix-so/clix-cli
+  channel: package-registry
+  relationship: distribution-channel
+  contract_reference:
+    register: npm registry (public package index)
+    spec_file: null
+    packages:
+    - name: '@clix-so/clix-cli'
+      version: 1.1.3
+      released: '2026-07-04'
+      released_field: modified
+      lapsed: false
+      page: https://www.npmjs.com/package/@clix-so/clix-cli
+      cli: bin clix
+      repo_leg: domain:clix.so
+      publisher_leg: email:clix.so
+      matched_by: domain
+    current: true
+    signal_note: 'the provider''s own command-line tool on a package manager: distribution, not an integration;
+      lapsed = no release in 24 months or deprecated / disabled by the manager'
+    detected_by: sweep-official-clis.py
+    detected: '2026-10-20'
+  detected_by: sweep-official-clis.py
+  first_seen: '2026-10-20'
+- partner_name: Agent Skills (own GitHub org)
+  partner: null
+  partner_match: register
+  type: register
+  direction: provider-built
+  category: Agent Skills package
+  evidence: https://github.com/clix-so/skills
+  channel: provider-built
+  relationship: compatible
+  shape: agent-skills
+  evidence_kind: own-repo
+  degree: skill-repo
+  report_only: true
+  agent_skills:
+    org: clix-so
+    current: true
+    repos:
+    - repo: clix-so/skills
+      archived: false
+      lapsed: false
+      pushed: '2026-03-18'
+  contract_reference:
+    register: 'provider''s own GitHub org (GitHub REST API: repo + git tree holds SKILL.md)'
+    spec_file: null
+    standard: Agent Skills (agentskills.io)
+    role: agent-skills-repo
+    matched_org: clix-so
+    matched_by: org-profile-domain:clix.so
+    detected_by: sweep-agent-skills.py
+    detected: '2026-10-20'
+  detected_by: sweep-agent-skills.py
+  first_seen: '2026-10-20'
+- partner_name: claude-plugins.dev
+  partner: null
+  partner_match: register
+  type: register
+  direction: partner-built
+  category: Agent Skills register
+  evidence: https://claude-plugins.dev/skills/@clix-so/skills
+  channel: standard-directory
+  relationship: compatible
+  shape: agent-skills
+  evidence_kind: register-listing
+  degree: listed
+  report_only: true
+  agent_skills_register:
+    repos:
+    - clix-so/skills
+    repo_verified: true
+    signal_note: the provider's own-org repos the register lists; skill / install counts never read
+  contract_reference:
+    register: claude-plugins.dev (public sitemap / list)
+    spec_file: null
+    standard: Agent Skills (agentskills.io)
+    role: agent-skills-listing
+    matched_org: clix-so
+    matched_by: org-profile-domain:clix.so
+    sample_skills:
+    - api-triggered-campaigns
+    - event-tracking
+    - integration
+    - personalization
+    - skill-creator
+    detected_by: sweep-agent-skills.py
+    detected: '2026-10-20'
+  detected_by: sweep-agent-skills.py
+  first_seen: '2026-10-20'
 generated: '2026-10-15'
 method: searched
 source:
@@ -143,14 +210,20 @@ source:
 checked:
 - https://a2aregistry.org/api/agents
 - https://api.nuget.org/v3
-- https://cdn.winget.microsoft.com/cache
 - https://crates.io/api/v1
-- https://formulae.brew.sh/api/cask.json
-- https://formulae.brew.sh/api/formula.json
-- https://github.com/ScoopInstaller/Extras
-- https://github.com/ScoopInstaller/Main
 - https://proxy.golang.org
 - https://pypi.org/pypi
 - https://registry.npmjs.org
 - https://repo1.maven.org/maven2
 - https://rubygems.org/api/v1
+- https://cdn.winget.microsoft.com/cache
+- https://formulae.brew.sh/api/cask.json
+- https://formulae.brew.sh/api/formula.json
+- https://github.com/ScoopInstaller/Extras
+- https://github.com/ScoopInstaller/Main
+- https://api.github.com
+- https://claude-plugins.dev/sitemap.xml
+- https://github.com/VoltAgent/awesome-agent-skills
+- https://officialskills.sh/sitemap.xml
+- https://skillsmp.com/sitemap.xml
+- https://www.skills.sh/sitemap.xml

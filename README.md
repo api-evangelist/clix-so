@@ -64,5 +64,129 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Clix is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
-- https://clix.so/
+Clix is a US-based, developer-first mobile push notification platform for iOS, Android, React Native and Flutter — one CLI command (clix install) automates Firebase Cloud Messaging and APNs setup, and the console adds behaviour-triggered and API-triggered campaigns, real-time delivery logs, full-funnel analytics and device/user lifecycle management, priced free to 100K active devices then $30/month. For developers and agents it publishes a small REST API at https://api.clix.so (OpenAPI 3.1.0 generated from clix/external/v1/clix.proto: 11 operations across users, devices, events, messages:send, live-activities:start and campaigns/{id}:trigger, authenticated with X-Clix-Project-ID + X-Clix-API-Key), an A2A agent at https://api.clix.so/a2a whose card at /.well-known/agent-card.json is served in both 0.3.0 and 1.0 shapes and exposes four skills (create-user, track-event, send-push-notification, trigger-campaign) with idempotency keys, SSE streaming, task cancellation and task webhooks, a stdio MCP server (@clix-so/clix-mcp-server) plus a Mintlify docs MCP endpoint — both documentation-only — an open agent-skills repo, first-party SDKs on Maven Central, CocoaPods/SwiftPM, pub.dev and npm, a self-hosted status page with a published 99.5% monthly SLO, and console-configured PUSH_SENT/PUSH_FAILED webhooks.
+
+**Areas:** Push Notifications · Mobile · Messaging · Campaigns · Event Tracking · Customer Engagement · A2A · MCP · Agents · SDK · United States · Company
+
+## Clix on APIs.io
+
+Everything profiled for Clix is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/clix-so/](https://apis.io/providers/clix-so/)** — or go straight to one of the APIs or properties below.
+
+### APIs (3)
+
+- [Clix A2A Agent](https://apis.io/apis/clix-so/clix-a2a-agent/) — Agent2Agent (A2A) protocol surface: a public agent card at https://api.clix.so/.well-known/agent-card.json (0.3.0 shape by default, 1.0 shape under the…
+- [Clix MCP Server](https://apis.io/apis/clix-so/clix-mcp-server/) — Model Context Protocol surfaces, both documentation-only: the provider's stdio server @clix-so/clix-mcp-server 0.1.4 (npx -y…
+- [Clix Clix External Service API](https://apis.io/apis/clix-so/clix-so-clixexternalservice-api/) — The ClixExternalService API from Clix — 10 operation(s) for clixexternalservice.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Clix So Webhooks](https://apis.io/asyncapis/clix-so/clix-so-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [clix-so-mcp.yml](https://apis.io/servers/clix-so/clix-so-mcp-yml/)
+
+#### Overlays (2)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Clix So Clixexternalservice Api Phrasing Overlay](https://apis.io/overlays/clix-so/clix-so-clixexternalservice-api-phrasing-overlay/)
+- [Clix So Openapi Overlay](https://apis.io/overlays/clix-so/clix-so-openapi-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Clix So Authentication](https://apis.io/security/clix-so/clix-so-authentication/)
+- [Clix So Domain Security](https://apis.io/security/clix-so/clix-so-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Clix So Plans Pricing](https://apis.io/plans/clix-so/clix-so-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Clix So Rate Limits](https://apis.io/rate-limits/clix-so/clix-so-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://clix.so/)
+- [Documentation](https://docs.clix.so/)
+- [Getting started](https://docs.clix.so/sdk-quickstart-ios)
+- [API reference](https://docs.clix.so/api-reference/overview)
+- [Pricing](https://clix.so/pricing)
+- [Support](https://docs.clix.so/troubleshooting/not-getting-push-notification)
+- [Blog](https://blog.clix.so/)
+- [Terms of service](https://clix.so/terms)
+- [Privacy policy](https://clix.so/privacy)
+- [GitHub](https://github.com/clix-so)
+- [Status](https://clix.so/status)
+
+## API Evangelist rating
+
+**Kin Score 67.9** — exemplar · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 55.9 |
+| Contract governance | 18.2 |
+| Operational transparency | 65.8 |
+| Developer ergonomics | 78.6 |
+| Access clarity | 76.3 |
+
+**Agent readiness 45.3** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | verified |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | yes |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | conformant |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 36.3** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/clix-so/](https://apis.io/providers/clix-so/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Clix: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/clix-so/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
